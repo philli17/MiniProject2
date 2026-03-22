@@ -3,6 +3,6 @@ Kaisa Nilsson, Mary Phillips, Romina Amirian
 
 First edit!! - Kaisa
 
-Second edit!! - Mary
+Second edit!!
 
 Third edit!! - Romina 
