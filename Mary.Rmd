@@ -1,0 +1,18 @@
+---
+title: "Mary"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+library(rvest)
+library(polite)
+library()
+```
+
+```{r}
+mn <- read_html("https://stateparks.com/mn.html")
+mn_parks <- html_nodes(mn, "#parklink a")
+mn_parks_text <- html_text(mn_parks)
+mn_parks_text
+```
