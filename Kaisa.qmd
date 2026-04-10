@@ -30,7 +30,26 @@ parks_text <- html_text(parks_list)
 
 ## test - writing a formula
 ```{r}
-parks_text[[1]] |>
+form <- parks_text[1] |>
   str_to_lower() |>
   str_replace_all(" ", "_")
+
+url <- str_c("https://stateparks.com/", form, "_in_minnesota.html")
+
+
+# formula -- generates urls we can scrap (only in mn) --------------------------
+url_list <- vector("character")
+for (i in 1:length(parks_text)) {
+  form <- parks_text[i] |>
+  str_to_lower() |>
+  str_replace_all(" ", "_")
+  url <- str_c("https://stateparks.com/", form, "_in_minnesota.html")
+  url_list <- c(url_list, url)
+}
+
 ```
+
+```{r}
+
+```
+
