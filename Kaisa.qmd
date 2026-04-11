@@ -21,32 +21,118 @@ robotstxt::paths_allowed("https://stateparks.com/")
 
 session <- bow("https://stateparks.com/minnesota_parks_and_recreation_destinations.html", force = TRUE)
 
-mn_parks <- read_html("https://stateparks.com/minnesota_parks_and_recreation_destinations.html")
+#better version?
+parks_text <- scrape(session) |>
+  html_nodes("#parklink a") |>
+  html_text()
 
-parks_list <- html_nodes(mn_parks, "#parklink a")
+#mn_parks <- read_html("https://stateparks.com/minnesota_parks_and_recreation_destinations.html")
 
-parks_text <- html_text(parks_list)
+#parks_list <- html_nodes(mn_parks, "#parklink a")
+
+#parks_text <- html_text(parks_list)
 ```
 
 ## test - writing a formula
 ```{r}
-form <- parks_text[1] |>
+form <- parks_text[116] |>
   str_to_lower() |>
-  str_replace_all(" ", "_")
+  str_replace_all(c(" " = "_", "'" = "_", "wildlife_mgmt." = "state_wildlife_management"))
 
 url <- str_c("https://stateparks.com/", form, "_in_minnesota.html")
 
+print(url_list)
 
 # formula -- generates urls we can scrape (only in mn) --------------------------
 url_list <- vector("character")
 for (i in 1:length(parks_text)) {
   form <- parks_text[i] |>
   str_to_lower() |>
-  str_replace_all(" ", "_")
+  str_replace_all(c(" " = "_", "'" = "", "wildlife_mgmt." = "state_wildlife_management"))
   url <- str_c("https://stateparks.com/", form, "_in_minnesota.html")
   url_list <- c(url_list, url)
 }
 
+# I just updated this so that all the urls are fixed! some weren't correct before
 ```
 
+
+
+
+## scraping the first paragraph
+
+```{r}
+# function using bow/scrape for finding paragraphs in parks 
+scrape_page <- function(url) {
+  Sys.sleep(5) # this follows the website robots requests
+  session <- bow(url, force = TRUE) #setting session
+  scrape(session) |>
+    html_nodes("#overview :nth-child(5)") |>
+    html_text()
+}
+
+# function using bow/scrape for finding paragraphs in parks (option 2)
+scrape_page2 <- function(url) {
+  Sys.sleep(5)
+  session <- bow(url, force = TRUE)
+  scrape(session) |>
+    html_nodes("#overview .psbod") |>
+    html_text()
+}
+
+# i think both of these work? I used the first but we could probably pick either
+
+
+# scraping the parks -----------------------------------------------------------
+paragraph_list <- vector("character")
+for (i in 1:length(url_list)) {
+  park_url <- url_list[i]
+  paragraph <- scrape_page(park_url)
+  paragraph_list <- c(paragraph_list, paragraph) 
+}
+
+print(paragraph_list) 
+
+#cleaning the paragraph list-- not perfect, it removes both extra empty strings AND those indicating no paragraph was available
+park_par_tbl <- paragraph_list |>
+  str_subset("[a-zA-Z]+") |>
+  str_subset("Email:|Picnickingyes", negate = TRUE) |>
+  as_tibble()
+
+#MISSING cascade river, father hennepin, helmer myre, kadunce river, o l kipp, st croix wild river, boekholt grove, cooks, coon lake, little elk, malardi lake, talcot lake, teiken-dalve, 
+```
+
+
+## scraping addresses
+
+```{r}
+# function for scraping addresses
+scrape_page3 <- function(url) {
+  Sys.sleep(5)
+  session <- bow(url, force = TRUE)
+  scrape(session) |>
+    html_nodes(".parkinfo div:nth-child(1)") |> # css selector for the address box,
+    html_text()                                 # but it selects park name as well
+}
+
+# checking it works on individual urls
+Sys.sleep(5)
+session <- bow("https://stateparks.com/badoura_state_forest_in_minnesota.html", force = TRUE)
+scrape(session) |>
+  html_nodes(".parkinfo div:nth-child(1)") |>
+    html_text()
+
+# scraping addresses
+address_list <- vector("character")
+for (i in 1:length(url_list)) {
+  park_url2 <- url_list[i]
+  address <- scrape_page3(park_url2)
+  address_list <- c(address_list, address) 
+}
+
+viewing <- address_list |>
+  as_tibble()
+
+# address list has a lot of extra characters that aren't visible in the tibble, and I haven't cleaned it yet
+```
 
