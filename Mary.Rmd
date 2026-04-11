@@ -4,15 +4,51 @@ output: html_document
 ---
 
 ```{r}
+#| include: FALSE
+
 library(tidyverse)
 library(rvest)
 library(polite)
-library()
+```
+
+
+## Getting lists of parks
+```{r}
+robotstxt::paths_allowed("https://stateparks.com/")
+
+
+session <- bow("https://stateparks.com/minnesota_parks_and_recreation_destinations.html", force = TRUE)
+
+mn_parks <- read_html("https://stateparks.com/minnesota_parks_and_recreation_destinations.html")
+
+parks_list <- html_nodes(mn_parks, "#parklink a")
+
+parks_text <- html_text(parks_list)
+```
+
+## test - writing a formula
+```{r}
+form <- parks_text[1] |>
+  str_to_lower() |>
+  str_replace_all(" ", "_")
+
+url <- str_c("https://stateparks.com/", form, "_in_minnesota.html")
+
+
+# formula -- generates urls we can scrape (only in mn) --------------------------
+url_list <- vector("character")
+for (i in 1:length(parks_text)) {
+  form <- parks_text[i] |>
+  str_to_lower() |>
+  str_replace_all(" ", "_")
+  url <- str_c("https://stateparks.com/", form, "_in_minnesota.html")
+  url_list <- c(url_list, url)
+}
 ```
 
 ```{r}
-mn <- read_html("https://stateparks.com/mn.html")
-mn_parks <- html_nodes(mn, "#parklink a")
-mn_parks_text <- html_text(mn_parks)
-mn_parks_text
+mn_park_ex <- read_html("https://stateparks.com/jeanette_state_forest_in_minnesota.html")
+
+paragraph <- html_nodes(mn_park_ex, "#overview .psbod")
+paragraph
 ```
