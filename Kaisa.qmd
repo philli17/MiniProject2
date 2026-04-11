@@ -37,7 +37,7 @@ form <- parks_text[1] |>
 url <- str_c("https://stateparks.com/", form, "_in_minnesota.html")
 
 
-# formula -- generates urls we can scrap (only in mn) --------------------------
+# formula -- generates urls we can scrape (only in mn) --------------------------
 url_list <- vector("character")
 for (i in 1:length(parks_text)) {
   form <- parks_text[i] |>
@@ -49,7 +49,4 @@ for (i in 1:length(parks_text)) {
 
 ```
 
-```{r}
-
-```
 
