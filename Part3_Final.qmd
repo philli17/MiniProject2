@@ -45,3 +45,17 @@ for (i in 1:length(parks_text)) {
   url_list <- c(url_list, url)
 }
 ```
+
+```{r}
+#This works! Kind of? It only pulls 44 paragraphs, and even if the code was working perfectly it would leave out 2 state parks (total 52). If I do 51 or 52 to has a an error (open.connection(x, "rb") ?)
+#using the list of urls, pulls the first paragraph of information for each state park
+paragraph_list <- vector("character")
+iteration <- 1
+for (i in 1:50) {
+  mn_park_ex <- read_html(url_list[iteration])
+  paragraph <- html_nodes(mn_park_ex, ".clearfix+ .psbod")
+  paragraph <- html_text(paragraph)
+  paragraph_list <- c(paragraph_list, paragraph) 
+  iteration <- iteration + 1
+}
+```

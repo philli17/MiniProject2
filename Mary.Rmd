@@ -46,9 +46,20 @@ for (i in 1:length(parks_text)) {
 }
 ```
 
-```{r}
-mn_park_ex <- read_html("https://stateparks.com/jeanette_state_forest_in_minnesota.html")
 
-paragraph <- html_nodes(mn_park_ex, "#overview .psbod")
-paragraph
+```{r}
+#This works! Kind of? It only pulls 44 paragraphs, and even if the code was working perfectly it would leave out 2 state parks (total 52). If I do 51 or 52 to has a an error (open.connection(x, "rb") ?)
+paragraph_list <- vector("character")
+iteration <- 1
+for (i in 1:50) {
+  mn_park_ex <- read_html(url_list[iteration])
+  paragraph <- html_nodes(mn_park_ex, ".clearfix+ .psbod")
+  paragraph <- html_text(paragraph)
+  paragraph_list <- c(paragraph_list, paragraph) 
+  iteration <- iteration + 1
+}
+```
+
+```{r}
+url_list[5]
 ```
