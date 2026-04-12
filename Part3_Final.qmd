@@ -35,7 +35,7 @@ parks_text <- scrape(session) |> #reads all of the text on the minnesota home pa
 ```{r}
 form <- parks_text[1] |>
   str_to_lower() |>
-  str_replace_all(c(" " = "_", "'" = "", "wildlife_mgmt." = "state_wildlife_management")) #for each park, the text is changed to lower case and put into snake case (_ instead of spaces) -- also takes care of differences between textt displayed and urls
+  str_replace_all(c(" " = "_", "'" = "", "wildlife_mgmt." = "state_wildlife_management")) #for each park, the text is changed to lower case and put into snake case (_ instead of spaces) -- also takes care of differences between text displayed and urls
 
 url <- str_c("https://stateparks.com/", form, "_in_minnesota.html") #to create a list of the urls, this sets up the beginning and end of the url (which is the same for every park)
 
@@ -99,14 +99,24 @@ for (i in 1:length(url_list)) { # iterates through the entire list of urls
 }
 
 print(paragraph_list) #checking
+```
 
+# cleaning paragraphs
+
+```{r}
 #cleaning the paragraph list-- not perfect, it removes both extra empty strings AND those indicating no paragraph was available
 park_par_tbl <- paragraph_list |>
   str_subset("[a-zA-Z]+") |> #removes strings that don't contain words
   str_subset("Email:|Picnickingyes", negate = TRUE) |> # removes extra rows that were only recorded on some pages
   as_tibble() # turns it into a viewable tibble
 
-#MISSING cascade river, father hennepin, helmer myre, kadunce river, o l kipp, st croix wild river, boekholt grove, cooks, coon lake, little elk, malardi lake, talcot lake, teiken-dalve, 
+
+# adding in missing rows -------------------------------------------------------
+indexes <- c(9, 11, 20, 26, 37, 40, 107, 109, 110, 112, 113, 114, 115) # indexes of parks with missing paragraphs: cascade river, father hennepin, helmer myre, kadunce river, o l kipp, st croix wild river, boekholt grove, cooks, coon lake, little elk, malardi lake, talcot lake, teiken-dalve
+
+for (i in 1:13) {
+  park_par_tbl <- append(park_par_tbl, "", after = indexes[i])
+}
 ```
 
 
@@ -142,3 +152,43 @@ viewing <- address_list |>
 
 # address list has a lot of extra characters that aren't visible in the tibble, and I haven't cleaned it yet
 ```
+
+## cleaning addresses
+```{r}
+cleaned_addresses <- address_list |>
+  # replace line breaks and tabs with spaces
+  str_replace_all("[\r\n\t]", " ") |>
+  #replace multiple spaces with a single space
+  str_replace_all("  +", " ") |>
+  #remove email addresses
+  str_replace("Email:.*$", "") |>
+  #remove phone numbers  
+  str_replace("Phone:.*$", "") |>
+  #remove reservation info
+  str_replace("Reservations:.*$", "") |>
+  str_replace_all("^[^\\d]*", "") # removes the extra park name at the front
+```
+
+# making the final tidy tibble
+```{r}
+#the initial tidy tibble
+final_parks <- tibble(
+  name = parks_text,
+  url = url_list,
+  address = cleaned_addresses,
+  description = park_par_tbl
+) |> 
+  mutate_all(na_if,"")
+
+# adding park type
+final_parks <- final_parks |>
+  mutate(type = case_when(
+    str_detect(parks_text, "State Park") ~ "state park",
+    str_detect(parks_text, "State Forest") ~ "state forest",
+    str_detect(parks_text, "Mgmt. Area") ~ "wildlife management area",
+    str_detect(parks_text, "National Park") ~ "national park",
+    str_detect(parks_text, "National Forest") ~ "national forest",
+    str_detect(parks_text, "Wildlife Refuge") ~ "wildlife refuge"
+  ))
+```
+

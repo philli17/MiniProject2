@@ -11,6 +11,7 @@ editor_options:
 library(tidyverse)
 library(rvest)
 library(polite)
+library(dplyr)
 ```
 
 
@@ -22,6 +23,7 @@ robotstxt::paths_allowed("https://stateparks.com/")
 session <- bow("https://stateparks.com/minnesota_parks_and_recreation_destinations.html", force = TRUE)
 
 #better version?
+Sys.sleep(5)
 parks_text <- scrape(session) |>
   html_nodes("#parklink a") |>
   html_text()
@@ -94,10 +96,11 @@ for (i in 1:length(url_list)) {
 print(paragraph_list) 
 
 #cleaning the paragraph list-- not perfect, it removes both extra empty strings AND those indicating no paragraph was available
+
 park_par_tbl <- paragraph_list |>
   str_subset("[a-zA-Z]+") |>
-  str_subset("Email:|Picnickingyes", negate = TRUE) |>
-  as_tibble()
+  str_subset("Email:|Picnickingyes", negate = TRUE) |> 
+  as_tibble() 
 
 #MISSING cascade river, father hennepin, helmer myre, kadunce river, o l kipp, st croix wild river, boekholt grove, cooks, coon lake, little elk, malardi lake, talcot lake, teiken-dalve, 
 ```
@@ -134,5 +137,131 @@ viewing <- address_list |>
   as_tibble()
 
 # address list has a lot of extra characters that aren't visible in the tibble, and I haven't cleaned it yet
+```
+
+```{r}
+park_names <- as_tibble(parks_text)
+
+indexes <- c(9, 11, 20, 26, 37, 40, 107, 109, 110, 112, 113, 114, 115)
+
+for (i in 1:13) {
+  park_par_tbl <- append(park_par_tbl, "", after = indexes[i])
+}
+
+park_pars <- as_tibble(park_par_tbl)
+
+new <- bind_cols(park_names, park_pars)
+```
+
+```{r}
+cleaned_addresses <- address_list |>
+  # replace line breaks and tabs with spaces
+  str_replace_all("[\r\n\t]", " ") |>
+  #replace multiple spaces with a single space
+  str_replace_all("  +", " ") |>
+  #remove email addresses
+  str_replace("Email:.*$", "") |>
+  #remove phone numbers  
+  str_replace("Phone:.*$", "") |>
+  #remove reservation info
+  str_replace("Reservations:.*$", "") |>
+  str_replace_all("^[^\\d]*", "") # removes the extra park name at the front
+
+
+
+clean2 <- cleaned_addresses |>
+  str_replace_all("^[^\\d]*", "")
+
+# same as Romina's code, but i fixed the paragraphs (my bad originally!)
+final <- tibble(
+  name = parks_text,
+  url = url_list,
+  address = cleaned_addresses,
+  description = park_par_tbl,
+  nature = nature_list2
+) 
+
+# replaced all the blanks with NAs
+final_parks <- final %>% mutate_all(na_if,"")
+
+#the final tidy tibble
+#final_parks <- tibble(
+ # park_name = parks_text,
+  #park_url = url_list,
+  #address = cleaned_addresses,
+  #description = park_par_tbl$description[1:length(parks_text)]
+#)
+
+#the first few rows
+head(final_parks)
+
+#the structure
+str(final_parks)
+
+# missing data
+#final_parks |>
+ # summarise(
+  #  total_parks = n(),
+  #  parks_with_address = sum(!is.na(address) & address != ""),
+  #  parks_with_description = sum(!is.na(description) & description != "")
+ # )
+
+```
+
+
+
+# optional scraping nature (and some history) sections
+```{r}
+scrape_page_nature <- function(url) {
+  Sys.sleep(5)
+  session <- bow(url, force = TRUE)
+  scrape(session) |>
+    html_nodes(".psbod:nth-child(8)") |>
+    html_text()
+}
+
+nature_list <- vector("character")
+for (i in 1:length(url_list)) {
+  park_url2 <- url_list[i]
+  nature <- scrape_page_nature(park_url2)
+  nature_list <- c(nature_list, nature) 
+}
+
+view(as_tibble(nature_list)) # missing: cascade river, father hennepin, helmer myre, 19(interstate) is the history, kadunce river, 27/28(lake carlos/maria) is history, ol kipp, st croix wild river, all forest except crow wing and grad portage, all mgmt except lac qui parle, all others except minnesota valley
+
+park_names <- as_tibble(parks_text)
+
+indexes <- c(9, 11, 20, 26, 37, 40, 52:63, 65:72, 74:110, 112:120, 122:124)
+
+nature_list2 <- nature_list
+
+for (i in 1:75) {
+  nature_list2 <- append(nature_list2, "", after = indexes[i])
+}
+
+view(as_tibble(nature_list2))
+```
+
+# adding park type
+```{r}
+final_parks <- final_parks |>
+  mutate(type = case_when(
+    str_detect(parks_text, "State Park") ~ "state park",
+    str_detect(parks_text, "State Forest") ~ "state forest",
+    str_detect(parks_text, "Mgmt. Area") ~ "wildlife management area",
+    str_detect(parks_text, "National Park") ~ "national park",
+    str_detect(parks_text, "National Forest") ~ "national forest",
+    str_detect(parks_text, "Wildlife Refuge") ~ "wildlife refuge"
+  ))
+
+
+
+
+str_detect(parks_text, "State Park")
+str_detect(parks_text, "State Forest")
+str_detect(parks_text, "Mgmt. Area")
+str_detect(parks_text, "National Park")
+str_detect(parks_text, "National Forest")
+str_detect(parks_text, "Wildlife Refuge")
 ```
 
