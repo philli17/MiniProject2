@@ -107,8 +107,7 @@ print(paragraph_list) #checking
 #cleaning the paragraph list-- not perfect, it removes both extra empty strings AND those indicating no paragraph was available
 park_par_tbl <- paragraph_list |>
   str_subset("[a-zA-Z]+") |> #removes strings that don't contain words
-  str_subset("Email:|Picnickingyes", negate = TRUE) |> # removes extra rows that were only recorded on some pages
-  as_tibble() # turns it into a viewable tibble
+  str_subset("Email:|Picnickingyes", negate = TRUE) # removes extra rows that were only recorded on some pages # turns it into a viewable tibble
 
 
 # adding in missing rows -------------------------------------------------------
