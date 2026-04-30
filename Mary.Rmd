@@ -63,3 +63,23 @@ for (i in 1:50) {
 ```{r}
 url_list[5]
 ```
+
+
+```{r}
+library(pdftools)
+```
+
+```{r}
+txt <- pdf_text("banning_bird_checklist.pdf")
+txt
+txt <- as_tibble(txt)
+toc <- pdf_toc("bird_checklist.pdf")
+toc
+```
+
+
+```{r}
+install.packages("tabulapdf", repos = c("https://ropensci.r-universe.dev", "https://cloud.r-project.org"))
+library(tabulapdf)
+f <- system.file("birdchecklist.pdf", package = "tabulapdf") 
+```
