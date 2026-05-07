@@ -3,3 +3,164 @@ title: "Final_Workspace"
 format: html
 editor: visual
 ---
+
+# Final project polygons work
+
+```{r}
+library(sf)
+library(leaflet)
+library(htmltools)
+library(glue)
+```
+
+```{r}
+final_parks <- read_csv("final_parks.csv") |>
+  mutate(name = case_when(
+    name == "Cascade River State Park Recreation Site" ~ "Cascade River State Park",
+    name == "Killen Woods State Park" ~ "Kilen Woods State Park",
+    name == "John Latsch State Park" ~ "John A Latsch State Park",
+    name == "Nerstrand Woods State Park" ~ "Nerstrand Big Woods State Park",
+    name == "Sakatah State Park" ~ "Sakatah Lake State Park",
+    name == "O L Kipp State Park" ~ "Great River Bluffs State Park",
+    name == "Saint Croix Wild River State Park" ~ "Wild River State Park",
+    name == "Helmer Myre State Park" ~ "Myre-Big Island State Park",
+    .default = name
+    ))
+
+park_ids <- read_csv("Dnr_Stat_Plan_Areas_Prk.csv")
+
+park_polygons <- read_sf("Dnr_Stat_Plan_Areas_Prk.geojson") |>
+  mutate(legislative_name = str_replace_all(legislative_name, "\\.", ""),
+         legislative_name = ifelse(legislative_name == "St Croix State Park", "Saint Croix State Park", legislative_name))
+```
+
+extras: - kadunce river - upper sioux
+
+# missing parks -- finding data
+
+-   crow wing state park
+-   forestville
+-   franz jevne
+-   glendalough
+-   grand portage
+-   lac qui parle
+-   lake louise
+-   lake shetek
+-   lake vermilion
+-   monson lake
+-   moose lake
+-   rice lake
+-   savanna portage
+-   schoolcraft
+
+```{r}
+name <- c("Crow Wing", "Forestville Mystery Cave", "Franz Jevne", "Glendalough", "Grand Portage", "Lac qui Parle", "Lake Louise", "Lake Shetek", "Lake Vermilion-Soudan Underground Mine", "Monson Lake", "Moose Lake", "Rice Lake", "Savanna Portage", "Schoolcraft", "Cascade River", "Father Hennepin", "Myre-Big Island", "Great River Bluffs", "Wild River")
+
+web_id <- c(139, 148, 157, 167, 173, 197, 214, 220, 285, 238, 239, 250, 259, 263, 133, 142, 175, 244, 254)
+
+# checking scraping allowed
+robotstxt::paths_allowed("https://www.dnr.state.mn.us/")
+
+# checking conditions
+session <- bow("https://www.dnr.state.mn.us/state_parks/list_alpha.html", force = TRUE)
+
+# making list
+urls <- vector("character")
+for (i in 1:length(web_id)) {
+  url <- str_c("https://www.dnr.state.mn.us/state_parks/park.html?id=spk00", web_id[i], "#information")
+  urls <- c(urls, url)
+}
+
+# scraping each page
+scrape_park_info <- function(url) {
+  Sys.sleep(5)
+  session <- bow(url, force = TRUE)
+  scrape(session) |>
+    html_nodes("meta[name='dc.description']") |>
+    html_attr("content")
+}
+
+# building outside of the function
+Sys.sleep(5)
+  session <- bow(urls[1], force = TRUE)
+  scrape(session) |>
+    html_nodes("meta[name='dc.description']") |>
+    html_attr("content")
+
+# getting descriptions
+description <- vector("character")
+for (i in 1:length(urls)) {
+  park_url <- urls[i]
+  paragraph <- scrape_park_info(park_url)
+  description <- c(description, paragraph) 
+}
+
+missing <- tibble(name, description) |>
+  mutate(name = str_c(name, " State Park"))
+
+new <- final_parks |>
+  #left_join(missing, by = "name") |>
+  full_join(missing, by = "name") |>
+  mutate(description = coalesce(description.x, description.y),
+         type = ifelse(is.na(type), "state park", type)) |>
+  select(name, url, address, description, type)
+
+#making a csv
+write_csv(new, "parks_updated.csv")
+```
+
+# loading in updated parks csv
+
+```{r}
+parks <- read_csv("parks_updated.csv")
+```
+
+# added html labels, fixed for extra parks
+
+```{r}
+parks_sf <- parks |>
+  left_join(park_polygons, by = c("name" = "legislative_name"))
+
+parks_sf <- parks_sf |>
+  mutate(labels = str_c("<p><strong>", name, "</strong></p>
+<p><span style='font-weight: 400;'>", description, "</span></p>"))
+
+labels <- lapply(parks_sf$labels, HTML)
+
+parks_sf <- st_as_sf(parks_sf)
+
+class(parks_sf)
+
+leaflet(parks_sf) |>
+  setView(-93.8, 46.5, 6) |>
+  addTiles() |>
+  addPolygons(
+    color = "darkred",
+    fillColor = "darkred",
+    fillOpacity = 1,
+    weight = 2,
+    opacity = 1,
+    highlightOptions = highlightOptions(
+      weight = 5,
+      color = "red",
+      bringToFront = TRUE),
+    label = labels,
+    labelOptions = popupOptions( 
+      style = list("font-weight" = "normal", padding = "2px 5px", color = "black", "width" = "450px", "white-space" = "normal"),
+      textsize = "15px",
+      direction = "auto")
+  )
+```
+
+# scraping wikipedia
+
+```{r}
+session <- bow("https://en.wikipedia.org/wiki/List_of_Minnesota_state_parks", force = TRUE)
+
+result <- scrape(session) |>
+  html_nodes(css = "table") |>
+  html_table(header = TRUE, fill = TRUE)
+try <- result[[1]]
+try <- try[-1,] 
+  
+```
