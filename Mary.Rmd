@@ -34,3 +34,70 @@ install.packages("tabulapdf", repos = c("https://ropensci.r-universe.dev", "http
 library(tabulapdf)
 f <- system.file("birdchecklist.pdf", package = "tabulapdf") 
 ```
+
+```{r}
+scrape_page <-
+  session <- bow(url, force = TRUE) #setting polite session
+  scrape(session) |>
+    html_nodes("#overview :nth-child(5)") |>  #css selector for overview
+    #css selector for the first paragraphs of the page
+    html_text() # converts to text
+```
+
+```{r}
+city_pop <- read_html("https://en.wikipedia.org/wiki/List_of_Minnesota_state_parks")
+
+pop <- html_nodes(city_pop, css = "table")
+html_table(pop, header = TRUE, fill = TRUE)  # find right table
+pop2 <- html_table(pop, header = TRUE, fill = TRUE)[[3]]
+pop2
+
+```
+
+```{r}
+session <- bow("https://en.wikipedia.org/wiki/List_of_Minnesota_state_parks", force = TRUE)
+
+result <- scrape(session) |>
+  html_nodes(css = "table") |>
+  html_table(header = TRUE, fill = TRUE)
+result <- result[[1]]
+
+pop3 <- as_tibble(pop2[,c(1:6,8)]) |>
+  slice(-1) |>
+  rename(`City` = `Municipality`,
+         `State` = `ST`,
+         `Estimate2024` = `2024estimate`,
+         `Census` = `2020census`,
+         `Area` = `2020 land area`,
+         `Density` = `2020 density`) |>
+  mutate(Estimate2024 = parse_number(Estimate2024),
+         Census = parse_number(Census),
+         #Change = ???   # get rid of % but preserve +/- (optional), parse number?
+         Area = parse_number(Area),
+         Density = parse_number(Density)) |> 
+  mutate(City = str_replace(City, "\\[.*$", ""))
+pop3
+
+```
+
+```{r}
+session <- bow("https://en.wikipedia.org/wiki/List_of_Minnesota_state_parks", force = TRUE)
+
+result <- scrape(session) |>
+  html_nodes(css = "table") |>
+  html_table(header = TRUE, fill = TRUE)
+try <- result[[1]]
+try <- try[-1,]
+try <- try[,-4]
+try <- try |> rename(Acres = `Size[9]`)
+```
+
+
+```{r}
+test <- try |>
+  mutate(`Park name` = str_replace_all(`Park name`, "[.]", "")) |>
+  mutate(`Park name` = str_replace_all(`Park name`, "[/]", " ")) |>
+  mutate(`Park name` = case_when(`Park name` == "Nerstrand-Big Woods State Park" ~ "Nerstrand Big Woods State Park",
+            .default = `Park name`))
+
+```

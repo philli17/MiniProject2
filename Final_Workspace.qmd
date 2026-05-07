@@ -161,7 +161,15 @@ result <- scrape(session) |>
 # takes the table of interest about parks
 try <- result[[1]]
 
-#removes the extra row 
+# removes the extra row, removes HA space column, renames Acres column from Size[9]
 try <- try[-1,] 
-  
+try <- try[,-4]
+try <- try |> rename(Acres = `Size[9]`)
+
+# removes . and / and renames parks to help with joining with the parks csv
+try <- try |>
+  mutate(`Park name` = str_replace_all(`Park name`, "[.]", "")) |>
+  mutate(`Park name` = str_replace_all(`Park name`, "[/]", " ")) |>
+  mutate(`Park name` = case_when(`Park name` == "Nerstrand-Big Woods State Park" ~ "Nerstrand Big Woods State Park",
+            .default = `Park name`))
 ```
