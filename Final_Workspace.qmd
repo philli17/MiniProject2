@@ -14,6 +14,9 @@ library(glue)
 ```
 
 ```{r}
+#| label: loading in datasets, making them match
+
+# original parks list
 final_parks <- read_csv("final_parks.csv") |>
   mutate(name = case_when(
     name == "Cascade River State Park Recreation Site" ~ "Cascade River State Park",
@@ -27,35 +30,19 @@ final_parks <- read_csv("final_parks.csv") |>
     .default = name
     ))
 
-park_ids <- read_csv("Dnr_Stat_Plan_Areas_Prk.csv")
-
+# polygon data by park
 park_polygons <- read_sf("Dnr_Stat_Plan_Areas_Prk.geojson") |>
   mutate(legislative_name = str_replace_all(legislative_name, "\\.", ""),
          legislative_name = ifelse(legislative_name == "St Croix State Park", "Saint Croix State Park", legislative_name))
 ```
 
-extras: - kadunce river - upper sioux
-
-# missing parks -- finding data
-
--   crow wing state park
--   forestville
--   franz jevne
--   glendalough
--   grand portage
--   lac qui parle
--   lake louise
--   lake shetek
--   lake vermilion
--   monson lake
--   moose lake
--   rice lake
--   savanna portage
--   schoolcraft
-
 ```{r}
+#| label: scraping missing park data
+
+#list of names of parks with missing info
 name <- c("Crow Wing", "Forestville Mystery Cave", "Franz Jevne", "Glendalough", "Grand Portage", "Lac qui Parle", "Lake Louise", "Lake Shetek", "Lake Vermilion-Soudan Underground Mine", "Monson Lake", "Moose Lake", "Rice Lake", "Savanna Portage", "Schoolcraft", "Cascade River", "Father Hennepin", "Myre-Big Island", "Great River Bluffs", "Wild River")
 
+#unique id number in each park url
 web_id <- c(139, 148, 157, 167, 173, 197, 214, 220, 285, 238, 239, 250, 259, 263, 133, 142, 175, 244, 254)
 
 # checking scraping allowed
@@ -64,7 +51,7 @@ robotstxt::paths_allowed("https://www.dnr.state.mn.us/")
 # checking conditions
 session <- bow("https://www.dnr.state.mn.us/state_parks/list_alpha.html", force = TRUE)
 
-# making list
+# making list of urls
 urls <- vector("character")
 for (i in 1:length(web_id)) {
   url <- str_c("https://www.dnr.state.mn.us/state_parks/park.html?id=spk00", web_id[i], "#information")
@@ -76,7 +63,7 @@ scrape_park_info <- function(url) {
   Sys.sleep(5)
   session <- bow(url, force = TRUE)
   scrape(session) |>
-    html_nodes("meta[name='dc.description']") |>
+    html_nodes("meta[name='dc.description']") |> # this scrapes the park description
     html_attr("content")
 }
 
@@ -95,13 +82,16 @@ for (i in 1:length(urls)) {
   description <- c(description, paragraph) 
 }
 
+# puts all the scraped data in a table
 missing <- tibble(name, description) |>
   mutate(name = str_c(name, " State Park"))
 
+# makes a full dataset with original + missing data
 new <- final_parks |>
-  #left_join(missing, by = "name") |>
-  full_join(missing, by = "name") |>
-  mutate(description = coalesce(description.x, description.y),
+  full_join(missing, by = "name") |> # this makes sure that rows that don't 
+  # match are kept
+  mutate(description = coalesce(description.x, description.y), # combines the
+         # description rows from each dataset
          type = ifelse(is.na(type), "state park", type)) |>
   select(name, url, address, description, type)
 
@@ -118,19 +108,25 @@ parks <- read_csv("parks_updated.csv")
 # added html labels, fixed for extra parks
 
 ```{r}
+# joining polygons
 parks_sf <- parks |>
   left_join(park_polygons, by = c("name" = "legislative_name"))
 
+# adding html labels of name/description
 parks_sf <- parks_sf |>
   mutate(labels = str_c("<p><strong>", name, "</strong></p>
 <p><span style='font-weight: 400;'>", description, "</span></p>"))
 
+# applying html
 labels <- lapply(parks_sf$labels, HTML)
 
+# making the dataframe sf
 parks_sf <- st_as_sf(parks_sf)
 
+# checking class
 class(parks_sf)
 
+# making the map!
 leaflet(parks_sf) |>
   setView(-93.8, 46.5, 6) |>
   addTiles() |>
@@ -157,10 +153,15 @@ leaflet(parks_sf) |>
 ```{r}
 session <- bow("https://en.wikipedia.org/wiki/List_of_Minnesota_state_parks", force = TRUE)
 
+# scrapes the tables
 result <- scrape(session) |>
   html_nodes(css = "table") |>
   html_table(header = TRUE, fill = TRUE)
+
+# takes the table of interest about parks
 try <- result[[1]]
+
+#removes the extra row 
 try <- try[-1,] 
   
 ```
