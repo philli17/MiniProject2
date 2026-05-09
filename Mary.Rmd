@@ -101,3 +101,10 @@ test <- try |>
             .default = `Park name`))
 
 ```
+
+```{r}
+try <- wikipedia |>
+  left_join(final_parks)
+
+
+```

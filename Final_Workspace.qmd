@@ -167,9 +167,14 @@ try <- try[,-4]
 try <- try |> rename(Acres = `Size[9]`)
 
 # removes . and / and renames parks to help with joining with the parks csv
-try <- try |>
+wikipedia <- try |>
   mutate(`Park name` = str_replace_all(`Park name`, "[.]", "")) |>
   mutate(`Park name` = str_replace_all(`Park name`, "[/]", " ")) |>
   mutate(`Park name` = case_when(`Park name` == "Nerstrand-Big Woods State Park" ~ "Nerstrand Big Woods State Park",
-            .default = `Park name`))
+            .default = `Park name`)) |>
+  rename(name = `Park name`) #renames park name column to match final_parks
+
+#left_joins the existing park data with the data from wikipedia
+with_wiki <- wikipedia |>
+  full_join(final_parks)
 ```
