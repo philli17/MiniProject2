@@ -103,8 +103,23 @@ test <- try |>
 ```
 
 ```{r}
-try <- wikipedia |>
-  left_join(final_parks)
+with_wiki |>
+  mutate(Acres = parse_number(Acres)) |>
+  rename(Year = `Year Established[4]`) |>
+  mutate(Year = str_replace(Year, "[[9]]$", ""))
 
+```
 
+```{r}
+visits <- read_csv("Seasonal_summary.csv")
+
+total_visits <- visits |>
+  filter (`Unit type` == "State Park")
+  group_by(`Park name`) |>
+  mutate(total = sum(`Vehicle visits`)) |>
+  distinct(`Park name`, .keep_all = TRUE) |>
+  select(`Park name`, `System`, `Implementing agency`, `Unit type`, `total`) |>
+  rename(name = `Park name`)
+
+write.csv(total_visits, "total_visits.csv")
 ```

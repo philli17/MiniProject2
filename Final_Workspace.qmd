@@ -178,3 +178,18 @@ wikipedia <- try |>
 with_wiki <- wikipedia |>
   full_join(final_parks)
 ```
+
+```{r}
+#create csv with visit totals by park
+visits <- read_csv("Seasonal_summary.csv")
+
+total_visits <- visits |>
+  filter (`Unit type` == "State Park") |>
+  group_by(`Park name`) |>
+  mutate(total = sum(`Vehicle visits`)) |>
+  distinct(`Park name`, .keep_all = TRUE) |>
+  select(`Park name`, `System`, `Implementing agency`, `Unit type`, `total`) |>
+  rename(name = `Park name`)
+
+write.csv(total_visits, "total_visits.csv")
+```
