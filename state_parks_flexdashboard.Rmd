@@ -1,0 +1,17 @@
+---
+title: "state_parks_flexdashboard"
+output: flexdashboard::flex_dashboard
+runtime: shiny
+---
+
+About
+==========================
+
+Column {data-width = 200}
+-------------------------
+
+This is our website for MN stateparks.
+
+Maps
+==========================
+

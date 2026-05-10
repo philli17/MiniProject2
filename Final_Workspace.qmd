@@ -1,7 +1,6 @@
 ---
 title: "Final_Workspace"
-output: flexdashboard::flex_dashboard
-runtime: shiny
+format: html
 editor: source
 ---
 
@@ -112,18 +111,7 @@ write_csv(new, "parks_updated.csv")
 parks <- read_csv("parks_updated.csv")
 ```
 
-About
-==========================
 
-Column {data-width = 200}
--------------------------
-
-This is our website for MN stateparks.
-
-
-
-Maps
-==========================
 
 
 
