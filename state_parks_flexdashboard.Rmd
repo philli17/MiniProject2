@@ -4,6 +4,20 @@ output: flexdashboard::flex_dashboard
 runtime: shiny
 ---
 
+```{r}
+library(leaflet)
+library(tidyverse)
+library(sf)
+```
+
+```{r, label = "parks csv", include = FALSE}
+parks <- read_csv("parks_updated.csv")
+
+park_polygons <- read_sf("Dnr_Stat_Plan_Areas_Prk.geojson") |>
+  mutate(legislative_name = str_replace_all(legislative_name, "\\.", ""),
+         legislative_name = ifelse(legislative_name == "St Croix State Park", "Saint Croix State Park", legislative_name))
+```
+
 About
 ==========================
 
@@ -14,4 +28,48 @@ This is our website for MN stateparks.
 
 Maps
 ==========================
+
+```{r, label = "adding html labels", include = FALSE}
+# joining polygons
+parks_sf <- parks |>
+  left_join(park_polygons, by = c("name" = "legislative_name"))
+
+# adding html labels of name/description
+parks_sf <- parks_sf |>
+  mutate(labels = str_c("<p><strong>", name, "</strong></p>
+<p><span style='font-weight: 400;'>", description, "</span></p>"))
+
+# applying html
+labels <- lapply(parks_sf$labels, HTML)
+
+# making the dataframe sf
+parks_sf <- st_as_sf(parks_sf)
+
+# checking class
+class(parks_sf)
+```
+
+```{r}
+renderLeaflet({
+  leaflet(parks_sf) |>
+  setView(-93.8, 46.5, 6) |>
+  addTiles() |>
+  addPolygons(
+    color = "darkred",
+    fillColor = "darkred",
+    fillOpacity = 1,
+    weight = 2,
+    opacity = 1,
+    highlightOptions = highlightOptions(
+      weight = 5,
+      color = "red",
+      bringToFront = TRUE),
+    label = labels,
+    labelOptions = popupOptions( 
+      style = list("font-weight" = "normal", padding = "2px 5px", color = "black", "width" = "450px", "white-space" = "normal"),
+      textsize = "15px",
+      direction = "auto")
+  )
+})
+```
 
