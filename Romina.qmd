@@ -1,0 +1,49 @@
+---
+title: "Untitled"
+editor: visual
+---
+
+```{r}
+library(tidyverse)
+library(lubridate)
+```
+
+```{r}
+csv_path <- "csv_files"
+
+seasonal_data <- read_csv(file.path(csv_path, "Seasonal_summary.csv"))
+metadata <- read_csv(file.path(csv_path, "Metadata.csv"))
+```
+
+```{r}
+#tidy and add yearly totals 
+seasonal_tidy <- seasonal_data |>
+  rename(park_name = `Park name`) |>
+  mutate(
+    season = str_extract(Season, "^[A-Za-z]+"),
+    year = as.numeric(str_extract(Season, "\\d{4}$")),
+    vehicle_visits = `Vehicle visits`
+  ) |>
+  group_by(park_name, year) |>
+  mutate(yearly_total = sum(vehicle_visits, na.rm = TRUE)) |>
+  ungroup()
+```
+
+```{r}
+#tidy metadata
+metadata_tidy <- metadata |>
+  rename(park_name = `Park name`,
+         unit_type = `Unit type`,
+         park_system = `Park system`)
+```
+
+```{r}
+#join for map-ready data
+map_ready_data <- seasonal_tidy |>
+  left_join(metadata_tidy, by = "park_name")
+```
+
+```{r}
+#save
+write_csv(map_ready_data, file.path(csv_path, "map_ready_data.csv"))
+```
