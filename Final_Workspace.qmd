@@ -188,15 +188,22 @@ wikipedia <- try |>
   mutate(`Park name` = str_replace_all(`Park name`, "[.]", "")) |>
   mutate(`Park name` = str_replace_all(`Park name`, "[/]", " ")) |>
   mutate(`Park name` = case_when(`Park name` == "Nerstrand-Big Woods State Park" ~ "Nerstrand Big Woods State Park",
-            .default = `Park name`)) |>
+         `Park name` == "St Croix State Park" ~ "Saint Croix State Park",
+         `Park name` == "Lake Vermilion Soudan Underground Mine State Park" ~ "Lake Vermilion-Soudan Underground Mine State Park",
+            .default = `Park name`),
+         Coordinates = str_replace_all(Coordinates, "^.*nowrap\\}", "")) |>
   rename(name = `Park name`) |> #renames park name column to match final_parks
   mutate(Acres = parse_number(Acres)) |> #changes Acres from chr to num
   rename(Year = `Year Established[4]`) |> #renames column
-  mutate(Year = str_sub(Year, 1, 4)) #removes extra brackets, leaves year
+  mutate(Year = str_sub(Year, 1, 4)) |> #removes extra brackets, leaves year
+  mutate(Coordinates = str_replace_all(Coordinates, "^.*/ ", ""),
+         Coordinates = str_replace_all(Coordinates, "\\(.*\\)", "")) |>
+  separate_wider_delim(Coordinates, delim = ";", names = c("lat", "long")) |>
+  mutate(long = str_trim(long), lat = str_trim(lat))
 
 #left_joins the existing park data with the data from wikipedia
 with_wiki <- wikipedia |>
-  full_join(final_parks)
+  full_join(parks)
 ```
 
 ```{r}
@@ -231,4 +238,81 @@ numbers <-
   mutate(year = str_sub(year, 1, 4))
 
 write.csv(numbers, "numbers.csv")
+```
+
+
+# second graph
+
+```{r}
+library(readr)
+numeric <- with_wiki |>
+  mutate(long = str_replace_all(long, "^[^\\d]*", "-")) |>
+  mutate(lat = as.numeric(lat), long = parse_number(long))
+```
+
+```{r}
+county_parks <- numeric |>
+  mutate(`County or Counties` = case_when(
+    str_detect(`County or Counties`, "[a-z] and ") ~ str_replace_all(`County or Counties`, " and", ","),
+    str_detect(`County or Counties`, "[a-z], and ") ~ str_replace_all(`County or Counties`, " and", ""),
+    .default = `County or Counties`)) |>
+  mutate(unpacked = str_split(`County or Counties`, ",")) |>
+  filter(!is.na(unpacked)) |>
+  unnest(cols = c(unpacked)) |>
+  mutate(county = str_trim(unpacked)) |>
+  #pivot_wider(names_from = county, values_from = n, values_fill = list(n = 0))
+  group_by(county) |>
+  mutate(num = n())
+  
+county_parks <- county_parks |>
+  mutate(county = ifelse(county == "Murray County", "Murray", county))
+
+```
+
+# mapping
+```{r}
+county_polygons <- read_sf("Mn_County_Boundaries_Multipart.geojson")
+
+county_maps <- county_parks |>
+  right_join(county_polygons, by = c("county" = "countyname")) |>
+  mutate(num = replace_na(num, 0))
+
+pal <- colorFactor(c("white", "yellow2", "yellowgreen", "forestgreen", "cyan4", "blue4"), county_maps$num)
+
+county_maps <- county_maps |>
+  mutate(labels = str_c(county, " County: ", num, ifelse(num == 1, " state park", " state parks")),
+         labels2 = name)
+
+labels <- lapply(county_maps$labels, HTML)
+labels2 <- lapply(county_maps$labels2, HTML)
+
+county_maps <- st_as_sf(county_maps)
+class(county_maps)
+
+leaflet(county_maps) |>
+  setView(-93.8, 46.5, 6) |>
+  addTiles() |>
+  addPolygons(
+    fillColor = ~pal(num),
+    weight = 2,
+    opacity = 1,
+    color = "white",
+    dashArray = "3",
+    fillOpacity = 0.7,
+    ) |>
+  addCircleMarkers(
+    lng = ~long,
+    lat = ~lat,
+    radius = 2,
+    color = "white",
+    fillOpacity = 1,
+    options = pathOptions(pane = "markerPane"),
+    label = labels2,
+    labelOptions = labelOptions(
+      style = list("font-weight" = "normal", padding = "3px 8px", color = "black"),
+      textsize = "15px",
+      direction = "auto")
+  ) |>
+  addLegend(pal = pal, values = ~num, opacity = 0.7, title = NULL,
+    position = "bottomright")
 ```
