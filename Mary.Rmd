@@ -125,9 +125,113 @@ write.csv(by_season_visits, "by_season_visits.csv")
 numbers <- 
   with_wiki |>
   left_join(by_season_visits) |> 
-  select(name, Season, total, Acres, `Year Established[4]`) |>
-  rename(year = `Year Established[4]`) |>
-  mutate(year = str_sub(year, 1, 4))
+  select(name, Season, total, Acres, Year) |>
+  mutate(Year = str_sub(Year, 1, 4))
 
 write.csv(numbers, "numbers.csv")
+```
+
+```{r}
+numbers |>
+  ggplot(aes(x = total, y = Year, color = Season)) +
+  geom_point() 
+```
+
+
+
+Column 
+-------------------------
+
+### Palmer Penguins
+
+```{r echo = FALSE}
+renderPlot({
+  ggplot(numbers, aes(x = bill_length_mm,
+              y = body_mass_g,
+              color = species)) +
+    geom_point() +
+    geom_smooth(method = lm, se = FALSE) +
+    labs(x = "Bill length (mm)", 
+         title = "Body mass (g)")
+})
+```
+
+```{r echo = FALSE}
+renderPlot({
+  ggplot(numbers, aes(x = total,
+                      y = Year,
+                      color = Season)) +
+    geom_point() +
+    labs(x = "Visitation (Car Counts)", 
+         y = "Year Park Established",
+         title = "Visitation by Year Park Established and Season")
+})
+```
+
+```{r, eval = FALSE, include = FALSE}
+ggplot(p, aes(x = bill_length_mm,
+              y = body_mass_g,
+              color = species)) +
+  geom_point() +
+  geom_smooth(method = lm, se = FALSE)
+```
+
+
+
+
+```{r, echo=FALSE}
+inputPanel(
+  selectInput("n_breaks2", label = "Number of bins:",
+              choices = c(5, 10, 15, 20, 25, 30), selected = 15),
+  
+  sliderInput("bw_adjust2", label = "Bandwidth adjustment:",
+              min = 0.1, max = 3, value = 1.2, step = 0.1)
+)
+```
+
+Column 
+-------------------------
+
+### Geyser Eruption Duration
+
+```{r echo = FALSE}
+renderPlot({
+  ggplot(faithful, aes(x = eruptions)) +
+    geom_histogram(aes(y = ..density..), 
+                   bins = as.numeric(input$n_breaks2),
+                   fill = "white", colour = "black") +
+    geom_density(adjust = input$bw_adjust2, colour = "blue") +
+    labs(x = "Duration (minutes)", 
+         title = "Geyser eruption duration")
+})
+```
+
+
+
+```{r, eval = FALSE, include = FALSE}
+# First write code that works, then incorporate into renderPlot
+ggplot(faithful, aes(x = eruptions)) +
+  geom_histogram(aes(y = ..density..), 
+                 bins = 15,
+                 fill = "white", colour = "black") +
+  geom_density(adjust = 1.2, colour = "blue") +
+  labs(x = "Duration (minutes)", 
+       title = "Geyser eruption duration")
+```
+
+```{r}
+ggplot(numbers, aes(x = Year)) +
+  geom_histogram(aes(y = total),
+                 bins = 15,
+                 fill = "white", colour = "black") +
+  geom_density(adjust = 1.2, color = "blue")
+
+```
+
+
+```{r}
+numbers |>
+  ggplot(aes(x = total, fill = Season, colour = Season)) +
+    geom_density()
+
 ```

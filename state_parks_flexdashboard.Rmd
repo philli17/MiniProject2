@@ -8,6 +8,7 @@ runtime: shiny
 library(leaflet)
 library(tidyverse)
 library(sf)
+numbers <-read_csv("numbers.csv")
 ```
 
 ```{r, label = "parks csv", include = FALSE}
@@ -25,6 +26,38 @@ Column {data-width = 200}
 -------------------------
 
 This is our website for MN stateparks.
+
+Graphs
+==========================
+
+Column
+-------------------------
+
+This is a scatterplot of visitation numbers by year of park established, and the color of the points is by the season, either Fall, Spring, Summer, or Winter
+```{r echo = FALSE}
+renderPlot({
+  ggplot(numbers, aes(x = total,
+                      y = Year,
+                      color = Season)) +
+    geom_point() +
+    labs(x = "Visitation (Car Counts)", 
+         y = "Year Park Established",
+         title = "Visitation by Year Park Established and Season")
+})
+```
+
+We can also look at some other data. This scatterplot charts the number of acres of a park against the year it was established. Theres...not much of a relationship that we can see.
+```{r echo = FALSE}
+renderPlot({
+  ggplot(numbers, aes(x = Acres,
+                      y = Year)) +
+    geom_point() +
+    labs(x = "Acres", 
+         y = "Year Park Established",
+         title = "Acres by Park Established Year")
+})
+```
+
 
 Maps
 ==========================
