@@ -1,0 +1,150 @@
+"","name","total","Acres","year"
+"1","Afton State Park",547678,"1,600","1969"
+"2","Banning State Park",406807,"5,597","1963"
+"3","Bear Head Lake State Park",265954,"3,013","1961"
+"4","Beaver Creek Valley State Park",29243,"715","1937"
+"5","Big Bog State Recreation Area",NA,"9,170","2000"
+"6","Big Stone Lake State Park",94400,"980","1961"
+"7","Blue Mounds State Park",180616,"1,567","1937"
+"8","Buffalo River State Park",135925,"1,068","1937"
+"9","Camden State Park",155262,"1,855","1935"
+"10","Carley State Park",58968,"209","1949"
+"11","Cascade River State Park",362739,"2,867","1957"
+"12","Charles A Lindbergh State Park",68550,"417","1931"
+"13","Crow Wing State Park",118786,"2,335","1959"
+"14","Cuyuna Country State Recreation Area",NA,"6,850","1993"
+"15","Father Hennepin State Park",227909,"275","1941"
+"16","Flandrau State Park",199538,"840","1937"
+"17","Forestville Mystery Cave State Park",NA,"3,163","1963"
+"18","Fort Ridgely State Park",69688,"537","1911"
+"19","Fort Snelling State Park",551893,"1,825","1961"
+"20","Franz Jevne State Park",22673,"118","1967"
+"21","Frontenac State Park",301856,"2,226","1957"
+"22","Garden Island State Recreation Area",NA,"715","1998"
+"23","George H Crosby Manitou State Park",NA,"6,200","1955"
+"24","Glacial Lakes State Park",104421,"1,857","1963"
+"25","Glendalough State Park",233080,"1,924","1991"
+"26","Gooseberry Falls State Park",1892412,"1,741","1937"
+"27","Grand Portage State Park",76394,"278","1989"
+"28","Great River Bluffs State Park",126360,"2,122","1963"
+"29","Greenleaf Lake State Recreation Area",NA,"1,230","2004"
+"30","Hayes Lake State Park",39380,"2,118","1967"
+"31","Interstate State Park",643143,"288","1895"
+"32","Iron Range Off-Highway Vehicle State Recreation Area",NA,"1,864","2002"
+"33","Itasca State Park",2481878,"30,553","1891"
+"34","Jay Cooke State Park",773559,"8,125","1915"
+"35","John A Latsch State Park",23615,"409","1925"
+"36","Judge C R Magney State Park",127314,"4,323","1957"
+"37","Kilen Woods State Park",33914,"202","1945"
+"38","La Salle Lake State Recreation Area",NA,"1,000","2011"
+"39","Lac qui Parle State Park",88196,"897","1959"
+"40","Lake Bemidji State Park",406905,"1,653","1923"
+"41","Lake Bronson State Park",234335,"2,806","1937"
+"42","Lake Carlos State Park",344490,"1,175","1937"
+"43","Lake Louise State Park",58444,"849","1963"
+"44","Lake Maria State Park",167082,"1,475","1963"
+"45","Lake Shetek State Park",224156,"1,109","1937"
+"46","Lake Vermilion Soudan Underground Mine State Park",NA,"2,875","2010"
+"47","Maplewood State Park",466886,"8,127","1963"
+"48","McCarthy Beach State Park",282975,"1,908","1945"
+"49","Mille Lacs Kathio State Park",363841,"9,786","1957"
+"50","Minneopa State Park",528809,"1,617","1905"
+"51","Minnesota Valley State Recreation Area",NA,"6,442","1969"
+"52","Monson Lake State Park",28799,"343","1937"
+"53","Moose Lake State Park",116926,"829","1971"
+"54","Myre-Big Island State Park",171222,"1,578","1947"
+"55","Nerstrand Big Woods State Park",280426,"1,646","1945"
+"56","Old Mill State Park",39183,"287","1951"
+"57","Red River State Recreation Area",NA,"104","1997"
+"58","Rice Lake State Park",79718,"712","1963"
+"59","St Croix Islands State Recreation Area",NA,"25","1935"
+"60","St Croix State Park",527300,"31,775","1943"
+"61","Sakatah Lake State Park",118819,"810","1963"
+"62","Savanna Portage State Park",161825,"15,277","1961"
+"63","Scenic State Park",237695,"2,370","1921"
+"64","Schoolcraft State Park",23154,"141","1959"
+"65","Sibley State Park",406612,"2,540","1919"
+"66","Split Rock Creek State Park",55631,"947","1937"
+"67","Split Rock Lighthouse State Park",408487,"2,112","1945"
+"68","Temperance River State Park",494594,"1,134","1957"
+"69","Tettegouche State Park",1693509,"8,998","1979"
+"70","Whitewater State Park",233385,"1,672","1919"
+"71","Wild River State Park",237832,"6,574","1973"
+"72","William O'Brien State Park",385791,"1,783","1947"
+"73","Zippel Bay State Park",192228,"2,826","1959"
+"74","Kadunce River State Park",NA,NA,NA
+"75","Saint Croix State Park",NA,NA,NA
+"76","Upper Sioux Agency State Park",63272,NA,NA
+"77","Badoura State Forest",NA,NA,NA
+"78","Battleground State Forest",NA,NA,NA
+"79","Bear Island State Forest",NA,NA,NA
+"80","Beltrami Island State Forest",NA,NA,NA
+"81","Big Fork State Forest",NA,NA,NA
+"82","Birch Lake State Forest",NA,NA,NA
+"83","Blackduck State Forest",NA,NA,NA
+"84","Bowstring State Forest",NA,NA,NA
+"85","Buena Vista State Forest",NA,NA,NA
+"86","Burntside State Forest",NA,NA,NA
+"87","Chengwatana State Forest",NA,NA,NA
+"88","Cloquet Valley State Forest",NA,NA,NA
+"89","Crow Wing State Forest",NA,NA,NA
+"90","D A R Memorial State Forest",NA,NA,NA
+"91","Emily State Forest",NA,NA,NA
+"92","Finland State Forest",NA,NA,NA
+"93","Fond du Lac State Forest",NA,NA,NA
+"94","Foot Hills State Forest",NA,NA,NA
+"95","General C C Andrews State Forest",NA,NA,NA
+"96","George Washington State Forest",NA,NA,NA
+"97","Golden Anniversary State Forest",NA,NA,NA
+"98","Grand Portage State Forest",NA,NA,NA
+"99","Hill River State Forest",NA,NA,NA
+"100","Huntersville State Forest",NA,NA,NA
+"101","Isabella Lake State Forest",NA,NA,NA
+"102","Jeanette State Forest",NA,NA,NA
+"103","Kabetogama State Forest",NA,NA,NA
+"104","Koochiching State Forest",NA,NA,NA
+"105","Lake Insula State Forest",NA,NA,NA
+"106","Land O'Lakes State Forest",NA,NA,NA
+"107","Lyons State Forest",NA,NA,NA
+"108","Minnesota Memorial Hardwood State Forest",NA,NA,NA
+"109","Minnesota State Forest",NA,NA,NA
+"110","Mississippi Headwaters State Forest",NA,NA,NA
+"111","Nemadji State Forest",NA,NA,NA
+"112","Northwest Angle State Forest",NA,NA,NA
+"113","Pat Bayle State Forest",NA,NA,NA
+"114","Paul Bunyan State Forest",NA,NA,NA
+"115","Pillsbury State Forest",NA,NA,NA
+"116","Pine Island State Forest",NA,NA,NA
+"117","Red Lake State Forest",NA,NA,NA
+"118","Remer State Forest",NA,NA,NA
+"119","Richard J Dorer Memorial Hardwood State Forest",NA,NA,NA
+"120","Rum River State Forest",NA,NA,NA
+"121","Saint Croix State Forest",NA,NA,NA
+"122","Savanna State Forest",NA,NA,NA
+"123","Smokey Bear State Forest",NA,NA,NA
+"124","Smoky Hills State Forest",NA,NA,NA
+"125","Snake River State Forest",NA,NA,NA
+"126","Solana State Forest",NA,NA,NA
+"127","Sturgeon River State Forest",NA,NA,NA
+"128","Two Inlets State Forest",NA,NA,NA
+"129","Wealthwood State Forest",NA,NA,NA
+"130","Welsh Lake State Forest",NA,NA,NA
+"131","White Earth State Forest",NA,NA,NA
+"132","Boekholt Grove Wildlife Mgmt. Area",NA,NA,NA
+"133","Carlos Avery Wildlife Mgmt. Area",NA,NA,NA
+"134","Cooks Wildlife Mgmt. Area",NA,NA,NA
+"135","Coon Lake Wildlife Mgmt. Area",NA,NA,NA
+"136","Lac Qui Parle Wildlife Mgmt. Area",NA,NA,NA
+"137","Little Elk Wildlife Mgmt. Area",NA,NA,NA
+"138","Malardi Lake Wildlife Mgmt. Area",NA,NA,NA
+"139","Talcot Lake Wildlife Mgmt. Area",NA,NA,NA
+"140","Teiken-Dalve Wildlife Mgmt. Area",NA,NA,NA
+"141","Voyageurs National Park",NA,NA,NA
+"142","Chippewa National Forest",NA,NA,NA
+"143","Superior National Forest",NA,NA,NA
+"144","Agassiz National Wildlife Refuge",NA,NA,NA
+"145","Mille Lacs National Wildlife Refuge",NA,NA,NA
+"146","Minnesota Valley National Wildlife Refuge",NA,NA,NA
+"147","Rice Lake National Wildlife Refuge",NA,NA,NA
+"148","Sherburne National Wildlife Refuge",NA,NA,NA
+"149","Tamarac National Wildlife Refuge",NA,NA,NA

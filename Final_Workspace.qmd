@@ -200,3 +200,15 @@ total_visits <- visits |>
 
 write.csv(total_visits, "total_visits.csv")
 ```
+
+```{r}
+#joins visitation data with acres and year established data from wikipedia
+numbers <- 
+  with_wiki |>
+  left_join(total_visits) |> 
+  select(name, total, Acres, `Year Established[4]`) |>
+  rename(year = `Year Established[4]`) |>
+  mutate(year = str_sub(year, 1, 4))
+
+write.csv(numbers, "numbers.csv")
+```
