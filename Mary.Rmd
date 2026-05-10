@@ -15,72 +15,6 @@ library(pdftools)
 ```
 
 ```{r}
-txt <- pdf_text("banning_bird_checklist.pdf")
-txt
-txt <- as_tibble(txt)
-toc <- pdf_toc("bird_checklist.pdf")
-toc
-```
-```{r}
-rawlines <- pdf_text("banning_bird_checklist.pdf") %>%
-  read_lines() %>%
-  data.frame() %>%
-  rename(rawline = 1)
-```
-
-
-```{r}
-install.packages("tabulapdf", repos = c("https://ropensci.r-universe.dev", "https://cloud.r-project.org"))
-library(tabulapdf)
-f <- system.file("birdchecklist.pdf", package = "tabulapdf") 
-```
-
-```{r}
-scrape_page <-
-  session <- bow(url, force = TRUE) #setting polite session
-  scrape(session) |>
-    html_nodes("#overview :nth-child(5)") |>  #css selector for overview
-    #css selector for the first paragraphs of the page
-    html_text() # converts to text
-```
-
-```{r}
-city_pop <- read_html("https://en.wikipedia.org/wiki/List_of_Minnesota_state_parks")
-
-pop <- html_nodes(city_pop, css = "table")
-html_table(pop, header = TRUE, fill = TRUE)  # find right table
-pop2 <- html_table(pop, header = TRUE, fill = TRUE)[[3]]
-pop2
-
-```
-
-```{r}
-session <- bow("https://en.wikipedia.org/wiki/List_of_Minnesota_state_parks", force = TRUE)
-
-result <- scrape(session) |>
-  html_nodes(css = "table") |>
-  html_table(header = TRUE, fill = TRUE)
-result <- result[[1]]
-
-pop3 <- as_tibble(pop2[,c(1:6,8)]) |>
-  slice(-1) |>
-  rename(`City` = `Municipality`,
-         `State` = `ST`,
-         `Estimate2024` = `2024estimate`,
-         `Census` = `2020census`,
-         `Area` = `2020 land area`,
-         `Density` = `2020 density`) |>
-  mutate(Estimate2024 = parse_number(Estimate2024),
-         Census = parse_number(Census),
-         #Change = ???   # get rid of % but preserve +/- (optional), parse number?
-         Area = parse_number(Area),
-         Density = parse_number(Density)) |> 
-  mutate(City = str_replace(City, "\\[.*$", ""))
-pop3
-
-```
-
-```{r}
 session <- bow("https://en.wikipedia.org/wiki/List_of_Minnesota_state_parks", force = TRUE)
 
 result <- scrape(session) |>
@@ -144,61 +78,56 @@ with_wiki |>
   select(name, total, Acres, `Year Established[4]`) |>
   rename(year = `Year Established[4]`) |>
   mutate(year = str_sub(year, 1, 4))
-  
-  
-  total_visits
-  
-    ggplot(aes(x = Acres, y = total)) +
+```  
+
+```{r}
+numbers |>
+  ggplot(aes(x = total, y = year)) +
   geom_point()
 
 ```
 
-# scraping wikipedia
-
 ```{r}
-session <- bow("https://en.wikipedia.org/wiki/List_of_Minnesota_state_parks", force = TRUE)
-
-# scrapes the tables
-result <- scrape(session) |>
-  html_nodes(css = "table") |>
-  html_table(header = TRUE, fill = TRUE)
-
-# takes the table of interest about parks
-try <- result[[1]]
-
-# removes the extra row, removes HA space column, renames Acres column from Size[9]
-try <- try[-1,] 
-try <- try[,-4]
-try <- try |> rename(Acres = `Size[9]`)
-
-# removes . and / and renames parks to help with joining with the parks csv
-wikipedia <- try |>
-  mutate(`Park name` = str_replace_all(`Park name`, "[.]", "")) |>
-  mutate(`Park name` = str_replace_all(`Park name`, "[/]", " ")) |>
-  mutate(`Park name` = case_when(`Park name` == "Nerstrand-Big Woods State Park" ~ "Nerstrand Big Woods State Park",
-            .default = `Park name`)) |>
-  rename(name = `Park name`) |> #renames park name column to match final_parks
-  mutate(Acres = parse_number(Acres)) |> #changes Acres from chr to num
-  rename(Year = `Year Established[4]`) |> #renames column
-  mutate(Year = str_sub(Year, 1, 4)) #removes extra brackets, leaves year
-
-#left_joins the existing park data with the data from wikipedia
-with_wiki <- wikipedia |>
-  full_join(final_parks)
-```
-
-```{r}
-#create csv with visit totals by park
 visits <- read_csv("Seasonal_summary.csv")
 
-total_visits <- visits |>
+seasonal_visits <- 
+  visits |>
   filter (`Unit type` == "State Park") |>
-  group_by(`Park name`) |>
+  group_by(`Park name`, Season) |>
   mutate(total = sum(`Vehicle visits`)) |>
   distinct(`Park name`, .keep_all = TRUE) |>
   select(`Park name`, `System`, `Implementing agency`, `Unit type`, `total`) |>
   rename(name = `Park name`) |>
   mutate(name = str_c(name, " State Park"))
 
-write.csv(total_visits, "total_visits.csv")
+write.csv(seasonal_visits, "seasonal_visits.csv")
+```
+
+```{r}
+visits <- read_csv("Seasonal_summary.csv")
+
+by_season_visits <- 
+  visits |>
+  filter (`Unit type` == "State Park") |>
+  mutate(Season = str_sub(Season, 1, -6)) |>
+  group_by(`Park name`, Season) |>
+  mutate(total = sum(`Vehicle visits`)) |>
+  distinct(`Park name`, .keep_all = TRUE) |>
+  select(`Park name`, `System`, `Implementing agency`, `Unit type`, `total`) |>
+  rename(name = `Park name`) |>
+  mutate(name = str_c(name, " State Park"))
+
+write.csv(by_season_visits, "by_season_visits.csv")
+```
+
+```{r}
+#joins visitation data with acres and year established data from wikipedia
+numbers <- 
+  with_wiki |>
+  left_join(by_season_visits) |> 
+  select(name, Season, total, Acres, `Year Established[4]`) |>
+  rename(year = `Year Established[4]`) |>
+  mutate(year = str_sub(year, 1, 4))
+
+write.csv(numbers, "numbers.csv")
 ```

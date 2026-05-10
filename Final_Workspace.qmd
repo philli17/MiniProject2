@@ -212,21 +212,23 @@ with_wiki <- wikipedia |>
 ```
 
 ```{r}
-#| label: visit total csv
+#| label: visit totals by season csv
 #| include: false
 #create csv with visit totals by park
 visits <- read_csv("Seasonal_summary.csv")
 
-total_visits <- visits |>
+by_season_visits <- 
+  visits |>
   filter (`Unit type` == "State Park") |>
-  group_by(`Park name`) |>
+  mutate(Season = str_sub(Season, 1, -6)) |>
+  group_by(`Park name`, Season) |>
   mutate(total = sum(`Vehicle visits`)) |>
   distinct(`Park name`, .keep_all = TRUE) |>
   select(`Park name`, `System`, `Implementing agency`, `Unit type`, `total`) |>
   rename(name = `Park name`) |>
   mutate(name = str_c(name, " State Park"))
 
-write.csv(total_visits, "total_visits.csv")
+write.csv(by_season_visits, "by_season_visits.csv")
 ```
 
 ```{r}
@@ -235,8 +237,8 @@ write.csv(total_visits, "total_visits.csv")
 #joins visitation data with acres and year established data from wikipedia
 numbers <- 
   with_wiki |>
-  left_join(total_visits) |> 
-  select(name, total, Acres, `Year Established[4]`) |>
+  left_join(by_season_visits) |> 
+  select(name, Season, total, Acres, `Year Established[4]`) |>
   rename(year = `Year Established[4]`) |>
   mutate(year = str_sub(year, 1, 4))
 
