@@ -11,6 +11,9 @@ library(sf)
 library(leaflet)
 library(htmltools)
 library(glue)
+library(tidyverse)
+library(polite)
+library(rvest)
 ```
 
 ```{r}
@@ -172,7 +175,10 @@ wikipedia <- try |>
   mutate(`Park name` = str_replace_all(`Park name`, "[/]", " ")) |>
   mutate(`Park name` = case_when(`Park name` == "Nerstrand-Big Woods State Park" ~ "Nerstrand Big Woods State Park",
             .default = `Park name`)) |>
-  rename(name = `Park name`) #renames park name column to match final_parks
+  rename(name = `Park name`) |> #renames park name column to match final_parks
+  mutate(Acres = parse_number(Acres)) |> #changes Acres from chr to num
+  rename(Year = `Year Established[4]`) |> #renames column
+  mutate(Year = str_sub(Year, 1, 4)) #removes extra brackets, leaves year
 
 #left_joins the existing park data with the data from wikipedia
 with_wiki <- wikipedia |>
@@ -189,7 +195,8 @@ total_visits <- visits |>
   mutate(total = sum(`Vehicle visits`)) |>
   distinct(`Park name`, .keep_all = TRUE) |>
   select(`Park name`, `System`, `Implementing agency`, `Unit type`, `total`) |>
-  rename(name = `Park name`)
+  rename(name = `Park name`) |>
+  mutate(name = str_c(name, " State Park"))
 
 write.csv(total_visits, "total_visits.csv")
 ```

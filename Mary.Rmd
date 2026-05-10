@@ -103,23 +103,49 @@ test <- try |>
 ```
 
 ```{r}
-with_wiki |>
+with_wiki <- with_wiki |>
   mutate(Acres = parse_number(Acres)) |>
   rename(Year = `Year Established[4]`) |>
-  mutate(Year = str_replace(Year, "[[9]]$", ""))
+  mutate(Year = str_sub(Year, 1, 4))
+```
 
+```{r}
+with_wiki |>
+  ggplot(aes(x = Year, y = Acres)) +
+  geom_point()
+
+with_wiki |>
+  ggplot(aes(x = Acres, y = Year)) +
+  geom_point()
+
+with_wiki |>
+  
+  
 ```
 
 ```{r}
 visits <- read_csv("Seasonal_summary.csv")
 
 total_visits <- visits |>
-  filter (`Unit type` == "State Park")
+  filter (`Unit type` == "State Park") |>
   group_by(`Park name`) |>
   mutate(total = sum(`Vehicle visits`)) |>
   distinct(`Park name`, .keep_all = TRUE) |>
   select(`Park name`, `System`, `Implementing agency`, `Unit type`, `total`) |>
-  rename(name = `Park name`)
+  rename(name = `Park name`) |>
+  mutate(name = str_c(name, " State Park"))
 
 write.csv(total_visits, "total_visits.csv")
+```
+
+```{r}
+with_wiki |>
+  left_join(total_visits) |>
+  ggplot(aes(x = Acres, y = total)) +
+  geom_point()
+
+```
+
+```{r}
+
 ```
