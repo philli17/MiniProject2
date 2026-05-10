@@ -1,12 +1,13 @@
 ---
 title: "Final_Workspace"
-format: html
-editor: visual
+output: flexdashboard::flex_dashboard
+runtime: shiny
+editor: source
 ---
 
-# Final project polygons work
 
 ```{r}
+#| include: false
 library(sf)
 library(leaflet)
 library(htmltools)
@@ -18,6 +19,7 @@ library(rvest)
 
 ```{r}
 #| label: loading in datasets, making them match
+#| include: false
 
 # original parks list
 final_parks <- read_csv("final_parks.csv") |>
@@ -41,6 +43,7 @@ park_polygons <- read_sf("Dnr_Stat_Plan_Areas_Prk.geojson") |>
 
 ```{r}
 #| label: scraping missing park data
+#| include: false
 
 #list of names of parks with missing info
 name <- c("Crow Wing", "Forestville Mystery Cave", "Franz Jevne", "Glendalough", "Grand Portage", "Lac qui Parle", "Lake Louise", "Lake Shetek", "Lake Vermilion-Soudan Underground Mine", "Monson Lake", "Moose Lake", "Rice Lake", "Savanna Portage", "Schoolcraft", "Cascade River", "Father Hennepin", "Myre-Big Island", "Great River Bluffs", "Wild River")
@@ -102,15 +105,33 @@ new <- final_parks |>
 write_csv(new, "parks_updated.csv")
 ```
 
-# loading in updated parks csv
 
 ```{r}
+#| label: parks csv
+#| include: false
 parks <- read_csv("parks_updated.csv")
 ```
+
+About
+==========================
+
+Column {data-width = 200}
+-------------------------
+
+This is our website for MN stateparks.
+
+
+
+Maps
+==========================
+
+
 
 # added html labels, fixed for extra parks
 
 ```{r}
+#| label: adding html labels
+#| include: false
 # joining polygons
 parks_sf <- parks |>
   left_join(park_polygons, by = c("name" = "legislative_name"))
@@ -128,7 +149,10 @@ parks_sf <- st_as_sf(parks_sf)
 
 # checking class
 class(parks_sf)
+```
 
+```{r}
+#| labels: making map
 # making the map!
 leaflet(parks_sf) |>
   setView(-93.8, 46.5, 6) |>
@@ -154,6 +178,8 @@ leaflet(parks_sf) |>
 # scraping wikipedia
 
 ```{r}
+#| label: scraping wikipedia
+#| include: false
 session <- bow("https://en.wikipedia.org/wiki/List_of_Minnesota_state_parks", force = TRUE)
 
 # scrapes the tables
@@ -186,6 +212,8 @@ with_wiki <- wikipedia |>
 ```
 
 ```{r}
+#| label: visit total csv
+#| include: false
 #create csv with visit totals by park
 visits <- read_csv("Seasonal_summary.csv")
 
@@ -202,6 +230,8 @@ write.csv(total_visits, "total_visits.csv")
 ```
 
 ```{r}
+#| label: visit data and years
+#| include: false
 #joins visitation data with acres and year established data from wikipedia
 numbers <- 
   with_wiki |>
