@@ -204,6 +204,8 @@ wikipedia <- try |>
 #left_joins the existing park data with the data from wikipedia
 with_wiki <- wikipedia |>
   full_join(parks)
+
+write_csv(with_wiki, "wiki_parks_data.csv")
 ```
 
 ```{r}
@@ -245,6 +247,9 @@ write.csv(numbers, "numbers.csv")
 
 ```{r}
 library(readr)
+
+with_wiki <- read_csv("wiki_parks_data.csv")
+
 numeric <- with_wiki |>
   mutate(long = str_replace_all(long, "^[^\\d]*", "-")) |>
   mutate(lat = as.numeric(lat), long = parse_number(long))
