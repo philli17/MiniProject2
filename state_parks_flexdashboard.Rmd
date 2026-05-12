@@ -33,7 +33,16 @@ About
 Column {data-width = 200}
 -------------------------
 
-This is our website for MN stateparks.
+**About This Project** 
+
+Minnesota is known as the Land of 10,000 Lakes, but its parks are equally impressive. For this project, we analyzed data in Minnesota’s state parks to understand what makes them unique and how visitation patterns vary across seasons and locations.
+
+The result is an interactive Shiny dashboard featuring maps, plots, and data tables that let users explore Minnesota’s state parks in depth. Whether you’re planning a trip or researching park trends, this tool provides insight into the state’s natural spaces. 
+
+**Data Sources:** [stateparks.com](http://stateparks.com), [Wikipedia](https://en.wikipedia.org/wiki/List_of_Minnesota_state_parks), [MN DNR GIS](https://gis.data.mn.gov/maps/a42128766db2447cb77a247d4a074173/about), [Joint Legacy Research Project](https://storymaps.arcgis.com/stories/8489886967dc48b58cb8f54e1a3c014f)
+
+**Authors:** Mary Phillips, Kaisa Nilsson, Romina Amirian
+
 
 Graphs
 ==========================
@@ -94,7 +103,7 @@ class(parks_sf)
 ```{r}
 renderLeaflet({
   leaflet(parks_sf) |>
-  setView(-93.8, 46.5, 6) |>
+  setView(-93.8, 46.5, 7) |>
   addTiles() |>
   addPolygons(
     color = "darkred",
