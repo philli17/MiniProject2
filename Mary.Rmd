@@ -144,7 +144,7 @@ season <- read_csv("seasonal_visits.csv")
 
 ```{r}
 season |>
-  mutate(year = str_sub(Season, -4, -1)) |>
+  mutate(visit-year = str_sub(Season, -4, -1)) |>
   mutate(Season = str_extract(Season, "[^-]+"))
 
 ```

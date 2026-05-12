@@ -13,6 +13,7 @@ library(leaflet)
 library(tidyverse)
 library(sf)
 library(readr)
+library(shiny)
 ```
 
 ```{r, label = "reading in csvs", include = FALSE}
@@ -36,19 +37,24 @@ Inputs {.sidebar}
 ```{r, echo = FALSE}
 inputPanel(
   selectInput("scatterplotx", label = "x-axis variable:",
-              choices = c("Bill Length" = "bill_len",
-                          "Flipper Length" = "flipper_len",
-                          "Bill Depth" = "bill_dep",
-                          "Body Mass" = "body_mass")),
+              choices = c("Visitation" = "total",
+                          "Year of Visit" = "visit_year",
+                          "Season" = "Season",
+                          "Park Size (acres)" = "Acres",
+                          "Park" = "name",
+                          "Year Established" = "Year")),
   selectInput("scatterploty", label = "y-axis variable:",
-              choices = c("Bill Length" = "bill_len",
-                          "Flipper Length" = "flipper_len",
-                          "Bill Depth" = "bill_dep",
-                          "Body Mass" = "body_mass")),
+              choices = c("Visitation" = "total",
+                          "Year of Visit" = "visit_year",
+                          "Season" = "Season",
+                          "Park Size (acres)" = "Acres",
+                          "Park" = "name",
+                          "Year Established" = "Year")),
   selectInput("color", label = "grouping variable:",
-              choices = c("Sex" = "sex",
-                          "Species" = "species",
-                          "Island" = "island"))
+              choices = c("Season" = "Season",
+                          "Year of Visit" = "visit_year",
+                          "Park" = "name",
+                          "Year Established" = "Year"))
 )
 ```
 
@@ -57,7 +63,7 @@ Column
 --------------------------
 ```{r echo = FALSE}
 renderPlot({
-  ggplot(penguins, aes(x = .data[[input$scatterplotx]], y = .data[[input$scatterploty]], color = .data[[input$color]])) + 
+  ggplot(numbers, aes(x = .data[[input$scatterplotx]], y = .data[[input$scatterploty]], color = .data[[input$color]])) + 
     geom_point()
 })
 ```

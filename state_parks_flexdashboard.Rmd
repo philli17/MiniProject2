@@ -53,9 +53,8 @@ Column
 This is a scatterplot of visitation numbers by year of park established, and the color of the points is by the season, either Fall, Spring, Summer, or Winter
 ```{r echo = FALSE}
 renderPlot({
-  ggplot(numbers, aes(x = total,
-                      y = Year,
-                      color = Season)) +
+  ggplot(numbers, aes(y = total,
+                      x = Year)) +
     geom_point() +
     labs(x = "Visitation (Car Counts)", 
          y = "Year Park Established",

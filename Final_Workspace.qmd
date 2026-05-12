@@ -236,10 +236,7 @@ write.csv(by_season_visits, "by_season_visits.csv")
 numbers <- 
   with_wiki |>
   left_join(by_season_visits) |> 
-  select(name, Season, total, Acres, `Year Established[4]`) |>
-  rename(year = `Year Established[4]`) |>
-  mutate(year = str_sub(year, 1, 4))
-
+  select(name, Season, visit_year, total, Acres, Year, `County or Counties`) 
 write.csv(numbers, "numbers.csv")
 ```
 
