@@ -217,11 +217,12 @@ visits <- read_csv("Seasonal_summary.csv")
 by_season_visits <- 
   visits |>
   filter (`Unit type` == "State Park") |>
-  mutate(Season = str_sub(Season, 1, -6)) |>
-  group_by(`Park name`, Season) |>
+  mutate(visit_year = str_sub(Season, -4, -1)) |>
+  mutate(Season = str_extract(Season, "[^-]+")) |>
+  group_by(`Park name`, Season, visit_year) |>
   mutate(total = sum(`Vehicle visits`)) |>
   distinct(`Park name`, .keep_all = TRUE) |>
-  select(`Park name`, `System`, `Implementing agency`, `Unit type`, `total`) |>
+  select(`Park name`, `System`, `Implementing agency`, `Unit type`, `total`, visit_year, Season) |>
   rename(name = `Park name`) |>
   mutate(name = str_c(name, " State Park"))
 

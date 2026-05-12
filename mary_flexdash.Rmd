@@ -1,0 +1,63 @@
+---
+title: "Mary Test Flexdash"
+output: 
+  flexdashboard::flex_dashboard:
+    theme:
+      version: 4
+      bootswatch: sandstone
+runtime: shiny
+---
+
+```{r}
+library(leaflet)
+library(tidyverse)
+library(sf)
+library(readr)
+```
+
+```{r, label = "reading in csvs", include = FALSE}
+numbers <-read_csv("numbers.csv")
+
+with_wiki <- read_csv("wiki_parks_data.csv")
+
+parks <- read_csv("parks_updated.csv")
+
+park_polygons <- read_sf("Dnr_Stat_Plan_Areas_Prk.geojson") |>
+  mutate(legislative_name = str_replace_all(legislative_name, "\\.", ""),
+         legislative_name = ifelse(legislative_name == "St Croix State Park", "Saint Croix State Park", legislative_name))
+```
+
+Graphs
+==========================
+
+Inputs {.sidebar}
+-------------------------
+
+```{r, echo = FALSE}
+inputPanel(
+  selectInput("scatterplotx", label = "x-axis variable:",
+              choices = c("Bill Length" = "bill_len",
+                          "Flipper Length" = "flipper_len",
+                          "Bill Depth" = "bill_dep",
+                          "Body Mass" = "body_mass")),
+  selectInput("scatterploty", label = "y-axis variable:",
+              choices = c("Bill Length" = "bill_len",
+                          "Flipper Length" = "flipper_len",
+                          "Bill Depth" = "bill_dep",
+                          "Body Mass" = "body_mass")),
+  selectInput("color", label = "grouping variable:",
+              choices = c("Sex" = "sex",
+                          "Species" = "species",
+                          "Island" = "island"))
+)
+```
+
+
+Column
+--------------------------
+```{r echo = FALSE}
+renderPlot({
+  ggplot(penguins, aes(x = .data[[input$scatterplotx]], y = .data[[input$scatterploty]], color = .data[[input$color]])) + 
+    geom_point()
+})
+```
