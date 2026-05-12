@@ -280,3 +280,11 @@ renderPlot({
     geom_point()
 })
 ```
+
+```{r}
+numbers |>
+  ggplot(aes(x = visit_year, color = Season, fill = Season)) +
+  geom_col(aes(y = total))
+
+
+```
