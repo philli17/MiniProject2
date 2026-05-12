@@ -1,6 +1,10 @@
 ---
-title: "state_parks_flexdashboard"
-output: flexdashboard::flex_dashboard
+title: "Minnesota State Parks"
+output: 
+  flexdashboard::flex_dashboard:
+    theme:
+      version: 4
+      bootswatch: sandstone
 runtime: shiny
 ---
 
@@ -74,11 +78,11 @@ parks_sf <- parks |>
 
 # adding html labels of name/description
 parks_sf <- parks_sf |>
-  mutate(labels = str_c("<p><strong>", name, "</strong></p>
+  mutate(labels1 = str_c("<p><strong>", name, "</strong></p>
 <p><span style='font-weight: 400;'>", description, "</span></p>"))
 
 # applying html
-labels <- lapply(parks_sf$labels, HTML)
+labels1 <- lapply(parks_sf$labels1, HTML)
 
 # making the dataframe sf
 parks_sf <- st_as_sf(parks_sf)
@@ -102,7 +106,7 @@ renderLeaflet({
       weight = 5,
       color = "red",
       bringToFront = TRUE),
-    label = labels,
+    label = labels1,
     labelOptions = popupOptions( 
       style = list("font-weight" = "normal", padding = "2px 5px", color = "black", "width" = "450px", "white-space" = "normal"),
       textsize = "15px",
