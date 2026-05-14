@@ -447,6 +447,8 @@ library(readr)
 numeric <- try |>
   mutate(long = str_replace_all(long, "^[^\\d]*", "-")) |>
   mutate(lat = as.numeric(lat), long = parse_number(long))
+
+numeric <- read_csv("wiki_parks_data.csv")
 ```
 
 
@@ -477,11 +479,12 @@ county_maps <- county_parks |>
   right_join(county_polygons, by = c("county" = "countyname")) |>
   mutate(num = replace_na(num, 0))
 
-pal <- colorFactor(c("white", "yellow2", "yellowgreen", "forestgreen", "cyan4", "blue4"), county_maps$num)
+pal1 <- colorFactor(c("white", "yellow2", "yellowgreen", "forestgreen", "cyan4", "blue4"), county_maps$num)
 
 county_maps <- county_maps |>
+  select(-geometry) |>
   mutate(labels = str_c(county, " County: ", num, ifelse(num == 1, " state park", " state parks")),
-         labels2 = `Park name`)
+         labels2 = `name`)
 
 labels <- lapply(county_maps$labels, HTML)
 labels2 <- lapply(county_maps$labels2, HTML)
@@ -499,6 +502,16 @@ leaflet(county_maps) |>
     color = "white",
     dashArray = "3",
     fillOpacity = 0.7,
+    highlightOptions = highlightOptions(
+      weight = 5,
+      color = "white",
+      dashArray = "",
+      bringToFront = TRUE),
+    label = labels,
+    labelOptions = labelOptions(
+      style = list("font-weight" = "normal", padding = "3px 8px", color = "black"),
+      textsize = "15px",
+      direction = "auto")
     ) |>
   addCircleMarkers(
     lng = ~long,
@@ -516,4 +529,69 @@ leaflet(county_maps) |>
   addLegend(pal = pal, values = ~num, opacity = 0.7, title = NULL,
     position = "bottomright")
 ```
+
+```{r}
+southern <- list("Traverse", "Big Stone", "Swift", "Lac qui Parle", "Chippewa", "Kandiyohi", "Meeker", "Renville", "McLeod", "Sibley", "Nicollet", "Le Sueur", "Rice", "Goodhue", "Wabasha", "Winona", "Houston", "Fillmore", "Mower", "Olmsted", "Dodge", "Steele", "Freeborn", "Waseca", "Faribault", "Blue Earth", "Martin", "Watonwan", "Brown", "Cottonwood", "Jackson", "Nobles", "Murray", "Rock", "Lyon", "Redwood", "Yellow Medicine", "Lincoln", "Pipestone")
+
+metro <- list("Dakota", "Scott", "Carver", "Wright", "Ramsey", "Hennepin", "Washington", "Chisago", "Anoka")
+
+arrowhead <- list("Isanti", "Kanabec", "Aitkin", "Itasca", "Koochiching", "Pine", "Carlton", "St. Louis", "Lake", "Cook")
+
+heartland <- list("Stevens", "Grant", "Douglas", "Pope", "Stearns", "Sherburne", "Benton", "Mille Lacs", "Crow Wing", "Cass", "Beltrami", "Lake of the Woods", "Roseau", "Kittson", "Marshall", "Pennington", "Clearwater", "Red Lake", "Polk", "Norman", "Mahnomen", "Clay", "Becker", "Hubbard", "Wadena", "Otter Tail", "Wilkin", "Todd", "Morrison")
+
+county_maps <- county_maps |>
+  mutate(region = case_when(county %in% southern ~ "Southern",
+                            county %in% heartland ~ "Heartland",
+                            county %in% metro ~ "Metro",
+                            county %in% arrowhead ~ "Arrowhead",
+                            .default = name)) |>
+  group_by(region) |>
+  mutate(count = n())
+
+
+pal2 <- colorFactor(c("yellow2", "forestgreen","cyan4", "blue4"), county_maps$count)
+
+county_maps <- county_maps |>
+  mutate(labels = str_c(county, " County: ", num, ifelse(num == 1, " state park", " state parks")),
+         labels2 = name,
+         labels3 = str_c(region, " Region: ", count, "state parks"))
+
+labels <- lapply(county_maps$labels, HTML)
+labels2 <- lapply(county_maps$labels2, HTML)
+labels3 <- lapply(county_maps$labels3, HTML)
+
+county_maps <- st_as_sf(county_maps)
+class(county_maps)
+
+leaflet(county_maps) |>
+  setView(-93.8, 46.5, 6) |>
+  addTiles() |>
+  addPolygons(
+    fillColor = ~pal(count),
+    weight = 2,
+    opacity = 1,
+    color = "white",
+    dashArray = "3",
+    fillOpacity = 0.7,
+    ) |>
+  addCircleMarkers(
+    lng = ~long,
+    lat = ~lat,
+    radius = 2,
+    color = "white",
+    fillOpacity = 1,
+    options = pathOptions(pane = "markerPane"),
+    label = labels,
+    labelOptions = labelOptions(
+      style = list("font-weight" = "normal", padding = "3px 8px", color = "black"),
+      textsize = "15px",
+      direction = "auto")
+  ) |>
+  addLegend(pal = pal, values = ~count, opacity = 0.7, title = NULL,
+    position = "bottomright")
+
+county_maps |> write_sf("mapping_data.geojson")
+```  
+  
+
 
