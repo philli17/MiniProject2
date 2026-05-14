@@ -15,6 +15,25 @@ library(pdftools)
 ```
 
 ```{r}
+southern <- list("Big Stone Lake State Park", "Blue Mounds State Park", "Camden State Park", "Carley State Park", "Flandrau State Park", "Fort Ridgely State Park", "Frontenac State Park", "Helmer Myre State Park", "John Latsch State Park", "Killen Woods State Park", "Minneopa State Park", "Nerstrand Woods State Park", "O L Kipp State Park", "Sakatah State Park", "Sibley State Park", "Split Rock Creek State Park", "Upper Sioux Agency State Park", "Whitewater State Park", "Beaver Creek Valley State Park", "Forestville Mystery Cave State Park", "Great River Bluffs State Park", "John A Latsch State Park", "Kilen Woods State Park", "Lac qui Parle State Park", "Lake Louise State Park","Monson Lake State Park", "Myre-Big Island State Park", "Nerstrand Big Woods State Park", "Rice Lake State Park", "Sakatah Lake State Park")
+
+heartland <- list("Buffalo River State Park", "Charles A Lindbergh State Park", "Father Hennepin State Park", "Glacial Lakes State Park", "Hayes Lake State Park", "Itasca State Park", "Lake Bemidji State Park", "Lake Bronson State Park", "Lake Carlos State Park", "Maplewood State Park", "Mille Lacs Kathio State Park", "Old Mill State Park", "Zippel Bay State Park", "Crow Wing State Park", "Glendalough State Park")
+
+
+metro <- list("Afton State Park", "Fort Snelling State Park", "Interstate State Park", "Lake Maria State Park", "Saint Croix Wild River State Park", "William O'Brien State Park")
+
+arrowhead <- list("Banning State Park", "George H Crosby Manitou State Park", "Gooseberry Falls State Park", "Jay Cooke State Park", "Judge C R Magney State Park", "Kadunce River State Park", "Saint Croix State Park", "Scenic State Park", "Split Rock Lighthouse State Park", "Temperance River State Park", "Tettegouche State Park", "Bear Head Lake State Park", "Cascade River State Park", "Franz Jevne State Park", "Franz Jevne State Park", "Grand Portage State Park", "Lake Vermilion-Soudan Underground Mine State Park", "McCarthy Beach State Park", "Moose Lake State Park", "Savanna Portage State Park", "Schoolcraft State Park", "Wild River State Park")
+
+numbers <- numbers |>
+  mutate(region = case_when(name %in% southern ~ "Southern",
+                            name %in% heartland ~ "Heartland",
+                            name %in% metro ~ "Metro",
+                            name %in% arrowhead ~ "Arrowhead",
+                            TRUE ~ as.character(name))) |>
+  filter(region == "Southern" | region == "Heartland" | region == "Arrowhead" | region == "Metro")
+```
+
+```{r}
 session <- bow("https://en.wikipedia.org/wiki/List_of_Minnesota_state_parks", force = TRUE)
 
 result <- scrape(session) |>
