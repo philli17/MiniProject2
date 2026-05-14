@@ -2,6 +2,8 @@
 title: "Minnesota State Parks"
 output: 
   flexdashboard::flex_dashboard:
+    navbar:
+      - { title: "Github", href: "https://github.com/philli17/MiniProject2" }
     theme:
       version: 4
       bootswatch: sandstone
@@ -47,33 +49,88 @@ The result is an interactive Shiny dashboard featuring maps, plots, and data tab
 Graphs
 ==========================
 
-Column
--------------------------
+Column 1
+--------------------------------------------------
+### Visitation by Year Established 
 
-This is a scatterplot of visitation numbers by year of park established, and the color of the points is by the season, either Fall, Spring, Summer, or Winter
-```{r echo = FALSE}
+This scatterplot compares visitation numbers to the year the park was established. It isn't the most useful stat, and it doesn't tell us much, but we can see that the oldest park (established in 1891, Itasca State Park) also has the highest number of visits, by far. As far as newer parks getting consistently lower visitation numbers, we probably can't draw that conclusion.
+
+### Scatterplot
+```{r}
 renderPlot({
-  ggplot(numbers, aes(y = total,
-                      x = Year)) +
+  ggplot(numbers, aes(x = Year,
+                      y = total,
+                      color = Season)) +
     geom_point() +
-    labs(x = "Visitation (Car Counts)", 
-         y = "Year Park Established",
-         title = "Visitation by Year Park Established and Season")
+    labs(x = "Year Park Established", 
+         y = "Total Visitation by Car",
+         color = "Region",
+         title = "Visitation by Year Established")
 })
 ```
 
-We can also look at some other data. This scatterplot charts the number of acres of a park against the year it was established. Theres...not much of a relationship that we can see.
+Column 2
+--------------------------------------------------
+### Visitation by Park Size (and Region)
+
+We can also look at some other data. This scatterplot charts the number of visitors against the number of acres of a park. The dots are colored based on their location. There are four regions of state parks in Minnesota: Arrowhead (northeast), Heartland (northwest), Metro (Twin-Cities), and Southern. This isn't the strongest relationship for a scatterplot to show, but we can see that the biggest park is much bigger than the other parks (the biggest is over 30000 acres, and the next biggest is only about 15000, half the size!). We can also see that the biggets parks with the most visitation are in the north - the Arrowhead and Heartland regions, while most Southern and Metro area parks are much smaller and have gotten fewer visitors.
+
+### Scatterplot
 ```{r echo = FALSE}
 renderPlot({
   ggplot(numbers, aes(x = Acres,
-                      y = Year)) +
+                      y = total,
+                      color = region)) +
     geom_point() +
-    labs(x = "Acres", 
-         y = "Year Park Established",
-         title = "Acres by Park Established Year")
+    labs(x = "Size of Park (acres)", 
+         y = "Total Visitation by Car",
+         title = "Visitation by Park Size")
 })
 ```
 
+Graphs - Interactive!
+==========================
+
+Bar Chart Inputs {.sidebar}
+-------------------------
+
+```{r, echo = FALSE}
+inputPanel(
+  selectInput("boxx", label = "x-axis variable:",
+              choices = c("Year of Visit" = "visit_year",
+                          "Visitation" = "total",
+                          "Season" = "Season",
+                          "Park Size (acres)" = "Acres",
+                          "County of Park" = "County or Counties",
+                          "Year Established" = "Year",
+                          "Region" = "region")),
+  selectInput("boxy", label = "y-axis variable:",
+              choices = c("Visitation" = "total",
+                          "Year of Visit" = "visit_year",
+                          "Season" = "Season",
+                          "Park Size (acres)" = "Acres",
+                          "County of Park" = "County or Counties",
+                          "Year Established" = "Year",
+                          "Region" = "region")),
+  selectInput("color", label = "grouping variable:",
+              choices = c("Season" = "Season",
+                          "Year of Visit" = "visit_year",
+                          "County of Park" = "County or Counties",
+                          "Year Established" = "Year",
+                          "Region" = "region"))
+)
+```
+
+Feel free to change around the variables with this bar chart as well! Our suggestion is x = Year of Visit, y = Visitation, grouping variable = Season - it makes it easy to see that there's more visits during summer, but also more during fall than spring, and winter is predictably the least visitation. Explore other combinations as well!
+
+Column
+--------------------------
+```{r echo = FALSE}
+renderPlot({
+  ggplot(numbers, aes(x = .data[[input$boxx]], y = .data[[input$boxy]], color = .data[[input$color]], fill = .data[[input$color]])) + 
+    geom_col()
+})
+```
 
 Maps - Individual Parks
 ==========================

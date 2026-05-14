@@ -31,7 +31,7 @@ park_polygons <- read_sf("Dnr_Stat_Plan_Areas_Prk.geojson") |>
 Scatterplot (kind of, unhelpful)
 ==========================
 
-Inputs {.sidebar}
+{.sidebar}
 -------------------------
 
 ```{r, echo = FALSE}
@@ -42,19 +42,22 @@ inputPanel(
                           "Season" = "Season",
                           "Park Size (acres)" = "Acres",
                           "County of Park" = "County or Counties",
-                          "Year Established" = "Year")),
+                          "Year Established" = "Year",
+                          "Region" = "region")),
   selectInput("scatterploty", label = "y-axis variable:",
               choices = c("Visitation" = "total",
                           "Year of Visit" = "visit_year",
                           "Season" = "Season",
                           "Park Size (acres)" = "Acres",
                           "County of Park" = "County or Counties",
-                          "Year Established" = "Year")),
+                          "Year Established" = "Year",
+                          "Region" = "region")),
   selectInput("color", label = "grouping variable:",
               choices = c("Season" = "Season",
                           "Year of Visit" = "visit_year",
                           "County of Park" = "County or Counties",
-                          "Year Established" = "Year"))
+                          "Year Established" = "Year",
+                          "Region" = "region"))
 )
 ```
 
@@ -65,48 +68,5 @@ Column
 renderPlot({
   ggplot(numbers, aes(x = .data[[input$scatterplotx]], y = .data[[input$scatterploty]], color = .data[[input$color]])) + 
     geom_point()
-})
-```
-
-
-
-Bar Chart (looks better)
-==========================
-
-Inputs {.sidebar}
--------------------------
-
-```{r, echo = FALSE}
-inputPanel(
-  selectInput("boxx", label = "x-axis variable:",
-              choices = c("Year of Visit" = "visit_year",
-                          "Visitation" = "total",
-                          "Season" = "Season",
-                          "Park Size (acres)" = "Acres",
-                          "County of Park" = "County or Counties",
-                          "Year Established" = "Year")),
-  selectInput("boxy", label = "y-axis variable:",
-              choices = c("Visitation" = "total",
-                          "Year of Visit" = "visit_year",
-                          "Season" = "Season",
-                          "Park Size (acres)" = "Acres",
-                          "County of Park" = "County or Counties",
-                          "Year Established" = "Year")),
-  selectInput("color", label = "grouping variable:",
-              choices = c("Season" = "Season",
-                          "Year of Visit" = "visit_year",
-                          "County of Park" = "County or Counties",
-                          "Year Established" = "Year"))
-)
-```
-
-Feel free to change around the variables with this bar chart as well! Our suggestion is x = Year of Visit, y = Visitation, grouping variable = Season, but explore other combinations as well!
-
-Column
---------------------------
-```{r echo = FALSE}
-renderPlot({
-  ggplot(numbers, aes(x = .data[[input$boxx]], y = .data[[input$boxy]], color = .data[[input$color]], fill = .data[[input$color]])) + 
-    geom_col()
 })
 ```
