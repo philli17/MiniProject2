@@ -1,0 +1,13 @@
+name: state_parks_flexdashboard
+title: state_parks_flexdashboard
+username: nilsso4
+account: nilsso4
+server: rconnect.stolaf.edu
+hostUrl: https://rconnect.stolaf.edu/__api__
+appId: 1448
+bundleId: 4541
+url: https://rconnect.stolaf.edu/content/173e1df2-1468-4cca-8a29-f47b217baebb/
+version: 1
+asMultiple: TRUE
+asStatic: FALSE
+ignoredFiles: first_shiny.Rmd

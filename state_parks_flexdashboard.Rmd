@@ -36,7 +36,7 @@ county_polygons <- read_sf("Mn_County_Boundaries_Multipart.geojson")
 ```
 
 ```{r fig.width = 4, fig.height = 6}
-include_graphics("/Users/rominaamirian/Downloads/parkimage.jpg")
+#include_graphics("/Users/rominaamirian/Downloads/parkimage.jpg")
 ```
 
 
@@ -83,7 +83,7 @@ The result is an interactive Shiny dashboard featuring maps, plots, and data tab
 **Link to our code:** https://github.com/philli17/MiniProject2#
 
 ```{r fig.width = 3, fig.height = 5}
-include_graphics("/Users/rominaamirian/Downloads/unnamed.png")
+#include_graphics("/Users/rominaamirian/Downloads/unnamed.png")
 ```
 
 Graphs
@@ -174,7 +174,7 @@ renderPlot({
 
 Maps - Individual Parks
 ==========================
-
+### This map shows the areas of each state park! Hovering over the red spaces will display the park name and information about it.
 
 ```{r, label = "adding html labels", include = FALSE}
 # joining polygons
@@ -197,7 +197,6 @@ class(parks_sf)
 ```
 
 ```{r}
-renderLeaflet({
   leaflet(parks_sf) |>
   setView(-93.8, 46.5, 7) |>
   addTiles() |>
@@ -217,15 +216,11 @@ renderLeaflet({
       textsize = "15px",
       direction = "auto")
   )
-})
 ```
 
 Maps - Counties
 ===================================
-
-Row
-----------------------------------
-Discussing the Map
+### This map shows the number of state parks in each county. The white circles are the location of each park. Hovering over the map will show the park counts and name of each park.
 
 ```{r, label = "lat long stuff", include = FALSE}
 county_maps <- county_maps |>
@@ -244,10 +239,7 @@ county_maps <- st_as_sf(county_maps)
 class(county_maps)
 ```
 
-Column {data-height = 3000}
-------------------------------------
 ```{r}
-renderLeaflet({
   leaflet(county_maps) |>
   setView(-93.8, 46.5, 7) |>
   addTiles() |>
@@ -284,25 +276,24 @@ renderLeaflet({
   ) |>
   addLegend(pal = pal1, values = ~num, opacity = 0.7, title = NULL,
     position = "bottomright")
-})
 ```
 
 Maps - Regions
 ==============================
+### This map, like the county map, shows the number of state parks in each region, based on the image from the home page. Hovering over the park markers will display their names.
 
 ```{r}
 pal2 <- colorFactor(c("yellow2", "forestgreen","cyan4", "blue4"), county_maps$count)
 ```
 
 ```{r}
-renderLeaflet({
   leaflet(county_maps) |>
   setView(-93.8, 46.5, 7) |>
   addTiles() |>
   addPolygons(
     fillColor = ~pal2(count),
     weight = 2,
-    opacity = 1,
+    opacity = 0.5,
     color = "white",
     dashArray = "3",
     fillOpacity = 0.7,
@@ -314,7 +305,7 @@ renderLeaflet({
     color = "white",
     fillOpacity = 1,
     options = pathOptions(pane = "markerPane"),
-    label = labels,
+    label = labels2,
     labelOptions = labelOptions(
       style = list("font-weight" = "normal", padding = "3px 8px", color = "black"),
       textsize = "15px",
@@ -322,6 +313,5 @@ renderLeaflet({
   ) |>
   addLegend(pal = pal2, values = ~count, opacity = 0.7, title = NULL,
     position = "bottomright")
-})
 ```
 
