@@ -28,6 +28,10 @@ parks <- read_csv("parks_updated.csv")
 park_polygons <- read_sf("Dnr_Stat_Plan_Areas_Prk.geojson") |>
   mutate(legislative_name = str_replace_all(legislative_name, "\\.", ""),
          legislative_name = ifelse(legislative_name == "St Croix State Park", "Saint Croix State Park", legislative_name))
+
+county_maps <- read_csv("mapping_data.csv")
+
+county_polygons <- read_sf("Mn_County_Boundaries_Multipart.geojson")
 ```
 
 About
@@ -184,60 +188,51 @@ renderLeaflet({
 Maps - Counties
 ===================================
 
+{.sidebar}
+----------------------------------
+Discussing the Map
+
 ```{r, label = "lat long stuff", include = FALSE}
-lat_long <- with_wiki |>
-  mutate(long = str_replace_all(long, "^[^\\d]*", "-")) |>
-  mutate(lat = as.numeric(lat), long = parse_number(long))
+county_maps <- county_maps |>
+  right_join(county_polygons, by = c("county" = "countyname")) |>
+  mutate(num = replace_na(num, 0))
 ```
 
 ```{r, label = "setting up map", include = FALSE}
-county_parks <- lat_long |>
-  mutate(`County or Counties` = case_when(
-    str_detect(`County or Counties`, "[a-z] and ") ~ str_replace_all(`County or Counties`, " and", ","),
-    str_detect(`County or Counties`, "[a-z], and ") ~ str_replace_all(`County or Counties`, " and", ""),
-    .default = `County or Counties`)) |>
-  mutate(unpacked = str_split(`County or Counties`, ",")) |>
-  filter(!is.na(unpacked)) |>
-  unnest(cols = c(unpacked)) |>
-  mutate(county = str_trim(unpacked)) |>
-  #pivot_wider(names_from = county, values_from = n, values_fill = list(n = 0))
-  group_by(county) |>
-  mutate(num = n())
-  
-county_parks <- county_parks |>
-  mutate(county = ifelse(county == "Murray County", "Murray", county))
-
-county_polygons <- read_sf("Mn_County_Boundaries_Multipart.geojson")
-
-county_maps <- county_parks |>
-  right_join(county_polygons, by = c("county" = "countyname")) |>
-  mutate(num = replace_na(num, 0))
-
-pal <- colorFactor(c("white", "yellow2", "yellowgreen", "forestgreen", "cyan4", "blue4"), county_maps$num)
-
-county_maps <- county_maps |>
-  mutate(labels = str_c(county, " County: ", num, ifelse(num == 1, " state park", " state parks")),
-         labels2 = name)
+pal1 <- colorFactor(c("white", "yellow2", "yellowgreen", "forestgreen", "cyan4", "blue4"), county_maps$num)
 
 labels <- lapply(county_maps$labels, HTML)
 labels2 <- lapply(county_maps$labels2, HTML)
+labels3 <- lapply(county_maps$labels3, HTML)
 
 county_maps <- st_as_sf(county_maps)
 class(county_maps)
 ```
 
+Column {data-height = 3000}
+------------------------------------
 ```{r}
 renderLeaflet({
   leaflet(county_maps) |>
   setView(-93.8, 46.5, 7) |>
   addTiles() |>
   addPolygons(
-    fillColor = ~pal(num),
+    fillColor = ~pal1(num),
     weight = 2,
     opacity = 1,
     color = "white",
     dashArray = "3",
     fillOpacity = 0.7,
+    highlightOptions = highlightOptions(
+      weight = 5,
+      color = "white",
+      dashArray = "",
+      bringToFront = TRUE),
+    label = labels,
+    labelOptions = labelOptions(
+      style = list("font-weight" = "normal", padding = "3px 8px", color = "black"),
+      textsize = "15px",
+      direction = "auto")
     ) |>
   addCircleMarkers(
     lng = ~long,
@@ -252,7 +247,46 @@ renderLeaflet({
       textsize = "15px",
       direction = "auto")
   ) |>
-  addLegend(pal = pal, values = ~num, opacity = 0.7, title = NULL,
+  addLegend(pal = pal1, values = ~num, opacity = 0.7, title = NULL,
     position = "bottomright")
 })
 ```
+
+Maps - Regions
+==============================
+
+```{r}
+pal2 <- colorFactor(c("yellow2", "forestgreen","cyan4", "blue4"), county_maps$count)
+```
+
+```{r}
+renderLeaflet({
+  leaflet(county_maps) |>
+  setView(-93.8, 46.5, 7) |>
+  addTiles() |>
+  addPolygons(
+    fillColor = ~pal2(count),
+    weight = 2,
+    opacity = 1,
+    color = "white",
+    dashArray = "3",
+    fillOpacity = 0.7,
+    ) |>
+  addCircleMarkers(
+    lng = ~long,
+    lat = ~lat,
+    radius = 2,
+    color = "white",
+    fillOpacity = 1,
+    options = pathOptions(pane = "markerPane"),
+    label = labels,
+    labelOptions = labelOptions(
+      style = list("font-weight" = "normal", padding = "3px 8px", color = "black"),
+      textsize = "15px",
+      direction = "auto")
+  ) |>
+  addLegend(pal = pal2, values = ~count, opacity = 0.7, title = NULL,
+    position = "bottomright")
+})
+```
+

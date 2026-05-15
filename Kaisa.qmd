@@ -448,7 +448,9 @@ numeric <- try |>
   mutate(long = str_replace_all(long, "^[^\\d]*", "-")) |>
   mutate(lat = as.numeric(lat), long = parse_number(long))
 
-numeric <- read_csv("wiki_parks_data.csv")
+numeric <- read_csv("wiki_parks_data.csv") |>
+  mutate(long = str_replace_all(long, "^[^\\d]*", "-")) |>
+  mutate(lat = as.numeric(lat), long = parse_number(long))
 ```
 
 
@@ -482,7 +484,7 @@ county_maps <- county_parks |>
 pal1 <- colorFactor(c("white", "yellow2", "yellowgreen", "forestgreen", "cyan4", "blue4"), county_maps$num)
 
 county_maps <- county_maps |>
-  select(-geometry) |>
+  select(-c(geometry, objectid, countyfips, shape_Length, shape_Area)) |>
   mutate(labels = str_c(county, " County: ", num, ifelse(num == 1, " state park", " state parks")),
          labels2 = `name`)
 
@@ -590,7 +592,7 @@ leaflet(county_maps) |>
   addLegend(pal = pal, values = ~count, opacity = 0.7, title = NULL,
     position = "bottomright")
 
-county_maps |> write_sf("mapping_data.geojson")
+county_maps |> write_csv("mapping_data.csv")
 ```  
   
 
