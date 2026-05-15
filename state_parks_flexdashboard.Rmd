@@ -16,6 +16,7 @@ library(tidyverse)
 library(sf)
 library(readr)
 library(htmltools)
+library(knitr)
 ```
 
 ```{r, label = "reading in csvs", include = FALSE}
@@ -34,6 +35,11 @@ county_maps <- read_csv("mapping_data.csv")
 county_polygons <- read_sf("Mn_County_Boundaries_Multipart.geojson")
 ```
 
+```{r fig.width = 4, fig.height = 6}
+include_graphics("/Users/rominaamirian/Downloads/parkimage.jpg")
+```
+
+
 About
 ==========================
 
@@ -41,15 +47,44 @@ Column {data-width = 200}
 -------------------------
 
 **About This Project** 
+Minnesota is known as the Land of 10,000 Lakes, but its state parks are equally impressive. From the rugged North Shore along Lake Superior to the rolling prairies in the southwest, these parks protect some of the most beautiful landscapes in the Midwest. For this project, we wanted to go beyond simply listing parks. We wanted to understand what makes each one unique and how people actually use them throughout the year.
 
-Minnesota is known as the Land of 10,000 Lakes, but its parks are equally impressive. For this project, we analyzed data in Minnesota’s state parks to understand what makes them unique and how visitation patterns vary across seasons and locations.
+To do this, we gathered data from multiple sources. We scraped park information from stateparks.com to collect descriptions and locations. We pulled historical details like founding dates, sizes, and water features from Wikipedia. We also added seasonal visitation data from a research project funded by Minnesota State Parks, which tracks how many vehicles visit each park across spring, summer, fall, and winter.
 
-The result is an interactive Shiny dashboard featuring maps, plots, and data tables that let users explore Minnesota’s state parks in depth. Whether you’re planning a trip or researching park trends, this tool provides insight into the state’s natural spaces. 
+The result is an interactive Shiny dashboard featuring maps, plots, and data tables that allow users to explore Minnesota's state parks in depth. Whether you are planning a weekend camping trip, conducting research, or simply curious about what the state has to offer, this tool provides a window into Minnesota's natural spaces.
+
+
+**What you can do here:**
+
+- **Compare parks:** See which ones are the oldest, largest, or most visited at a glance
+
+- **Explore the map:** Click on park locations to learn more, or view park boundaries overlaid across Minnesota
+
+- **Track seasons:** Discover when parks are busiest and how visitation patterns change throughout the year
+
+- **Spot trends:** See where parks are concentrated across different counties and regions of the state
+
+**What we set out to learn:** 
+
+- Which parks are the oldest, largest, and most visited?
+
+- Does location have any relationship with these properties?
+
+- Which areas of Minnesota have the highest concentration of parks?
+
+- How does visitation change across seasons?
+
+- Do different parks show different visitation patterns?
 
 **Data Sources:** [stateparks.com](http://stateparks.com), [Wikipedia](https://en.wikipedia.org/wiki/List_of_Minnesota_state_parks), [MN DNR GIS](https://gis.data.mn.gov/maps/a42128766db2447cb77a247d4a074173/about), [Joint Legacy Research Project](https://storymaps.arcgis.com/stories/8489886967dc48b58cb8f54e1a3c014f)
 
 **Authors:** Mary Phillips, Kaisa Nilsson, Romina Amirian
 
+**Link to our code:** https://github.com/philli17/MiniProject2#
+
+```{r fig.width = 3, fig.height = 5}
+include_graphics("/Users/rominaamirian/Downloads/unnamed.png")
+```
 
 Graphs
 ==========================
