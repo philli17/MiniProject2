@@ -188,7 +188,7 @@ renderLeaflet({
 Maps - Counties
 ===================================
 
-{.sidebar}
+Row
 ----------------------------------
 Discussing the Map
 
