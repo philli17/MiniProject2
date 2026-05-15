@@ -259,6 +259,71 @@ numbers <- numbers |>
 write.csv(numbers, "numbers.csv")
 ```
 
+```{r}
+#| label: making mapping data
+
+#this has the lat/long data
+numeric <- read_csv("wiki_parks_data.csv") |>
+  mutate(long = str_replace_all(long, "^[^\\d]*", "-")) |>
+  mutate(lat = as.numeric(lat), long = parse_number(long)) # makes both numeric
+
+#formatting the counties
+county_parks <- numeric |>
+  mutate(`County or Counties` = case_when( # replaces to makes easy to split
+    str_detect(`County or Counties`, "[a-z] and ") ~ str_replace_all(`County or Counties`, " and", ","),
+    str_detect(`County or Counties`, "[a-z], and ") ~ str_replace_all(`County or Counties`, " and", ""),
+    .default = `County or Counties`)) |>
+  mutate(unpacked = str_split(`County or Counties`, ",")) |> #splits list on ,
+  filter(!is.na(unpacked)) |> # gets rid of NAs
+  unnest(cols = c(unpacked)) |> # separates apart the counties
+  mutate(county = str_trim(unpacked)) |> # gets rids of extra space
+  #pivot_wider(names_from = county, values_from = n, values_fill = list(n = 0))
+  group_by(county) |>
+  mutate(num = n()) # counts of parks by county
+  
+county_parks <- county_parks |>
+  mutate(county = ifelse(county == "Murray County", "Murray", county)) # renames
+
+county_maps <- county_parks #|>
+  #select(-c(geometry, objectid, countyfips, shape_Length, shape_Area)) |> 
+  # gets rid of geometry data to avoid redundance
+  #mutate(labels = str_c(county, " County: ", num, ifelse(num == 1, " state park", " state parks")),
+         #labels2 = `name`) #adds labels for mapping
+```
+
+```{r}
+#| label: county regions (redundant, oops)
+southern <- list("Traverse", "Big Stone", "Swift", "Lac qui Parle", "Chippewa", "Kandiyohi", "Meeker", "Renville", "McLeod", "Sibley", "Nicollet", "Le Sueur", "Rice", "Goodhue", "Wabasha", "Winona", "Houston", "Fillmore", "Mower", "Olmsted", "Dodge", "Steele", "Freeborn", "Waseca", "Faribault", "Blue Earth", "Martin", "Watonwan", "Brown", "Cottonwood", "Jackson", "Nobles", "Murray", "Rock", "Lyon", "Redwood", "Yellow Medicine", "Lincoln", "Pipestone")
+
+metro <- list("Dakota", "Scott", "Carver", "Wright", "Ramsey", "Hennepin", "Washington", "Chisago", "Anoka")
+
+arrowhead <- list("Isanti", "Kanabec", "Aitkin", "Itasca", "Koochiching", "Pine", "Carlton", "St. Louis", "Lake", "Cook")
+
+heartland <- list("Stevens", "Grant", "Douglas", "Pope", "Stearns", "Sherburne", "Benton", "Mille Lacs", "Crow Wing", "Cass", "Beltrami", "Lake of the Woods", "Roseau", "Kittson", "Marshall", "Pennington", "Clearwater", "Red Lake", "Polk", "Norman", "Mahnomen", "Clay", "Becker", "Hubbard", "Wadena", "Otter Tail", "Wilkin", "Todd", "Morrison")
+
+# adding in regions
+county_maps <- county_maps |>
+  mutate(region = case_when(county %in% southern ~ "Southern",
+                            county %in% heartland ~ "Heartland",
+                            county %in% metro ~ "Metro",
+                            county %in% arrowhead ~ "Arrowhead",
+                            .default = name)) |>
+  group_by(region) |>
+  mutate(count = n()) # count of parks in each region
+
+#adds labels to use when mapping
+county_maps <- county_maps |>
+  mutate(labels = str_c(county, " County: ", num, ifelse(num == 1, " state park", " state parks")),
+         labels2 = name,
+         labels3 = str_c(region, " Region: ", count, "state parks"))
+
+#makes the labels html
+labels <- lapply(county_maps$labels, HTML)
+labels2 <- lapply(county_maps$labels2, HTML)
+labels3 <- lapply(county_maps$labels3, HTML)
+
+county_maps |> write_csv("mapping_data.csv")
+```
 
 # second graph
 
@@ -295,32 +360,39 @@ county_parks <- county_parks |>
 ```{r}
 county_polygons <- read_sf("Mn_County_Boundaries_Multipart.geojson")
 
-county_maps <- county_parks |>
+#joining gis data
+county_maps <- county_maps |>
   right_join(county_polygons, by = c("county" = "countyname")) |>
   mutate(num = replace_na(num, 0))
 
-pal <- colorFactor(c("white", "yellow2", "yellowgreen", "forestgreen", "cyan4", "blue4"), county_maps$num)
+#making custom palettes
+pal1 <- colorFactor(c("white", "yellow2", "yellowgreen", "forestgreen", "cyan4", "blue4"), county_maps$num)
 
-county_maps <- county_maps |>
-  mutate(labels = str_c(county, " County: ", num, ifelse(num == 1, " state park", " state parks")),
-         labels2 = name)
-
-labels <- lapply(county_maps$labels, HTML)
-labels2 <- lapply(county_maps$labels2, HTML)
+pal2 <- colorFactor(c("yellow2", "forestgreen","cyan4", "blue4"), county_maps$count)
 
 county_maps <- st_as_sf(county_maps)
 class(county_maps)
 
-leaflet(county_maps) |>
-  setView(-93.8, 46.5, 6) |>
+ leaflet(county_maps) |>
+  setView(-93.8, 46.5, 7) |>
   addTiles() |>
   addPolygons(
-    fillColor = ~pal(num),
+    fillColor = ~pal1(num),
     weight = 2,
     opacity = 1,
     color = "white",
     dashArray = "3",
     fillOpacity = 0.7,
+    highlightOptions = highlightOptions(
+      weight = 5,
+      color = "white",
+      dashArray = "",
+      bringToFront = TRUE),
+    label = labels,
+    labelOptions = labelOptions(
+      style = list("font-weight" = "normal", padding = "3px 8px", color = "black"),
+      textsize = "15px",
+      direction = "auto")
     ) |>
   addCircleMarkers(
     lng = ~long,
@@ -335,6 +407,72 @@ leaflet(county_maps) |>
       textsize = "15px",
       direction = "auto")
   ) |>
-  addLegend(pal = pal, values = ~num, opacity = 0.7, title = NULL,
+  addLegend(pal = pal1, values = ~num, opacity = 0.7, title = NULL,
     position = "bottomright")
 ```
+
+```{r}
+leaflet(county_maps) |>
+  setView(-93.8, 46.5, 7) |>
+  addTiles() |>
+  addPolygons(
+    fillColor = ~pal2(count),
+    weight = 2,
+    opacity = 1,
+    color = "white",
+    dashArray = "3",
+    fillOpacity = 0.7,
+    ) |>
+  addCircleMarkers(
+    lng = ~long,
+    lat = ~lat,
+    radius = 2,
+    color = "white",
+    fillOpacity = 1,
+    options = pathOptions(pane = "markerPane"),
+    label = labels,
+    labelOptions = labelOptions(
+      style = list("font-weight" = "normal", padding = "3px 8px", color = "black"),
+      textsize = "15px",
+      direction = "auto")
+  ) |>
+  addLegend(pal = pal2, values = ~count, opacity = 0.7, title = NULL,
+    position = "bottomright")
+```
+
+```{r}
+#adding park boundaries
+parks_sf <- parks |>
+  left_join(park_polygons, by = c("name" = "legislative_name"))
+
+parks_sf <- parks_sf |>
+  mutate(labels = str_c("<p><strong>", name, "</strong></p>
+<p><span style='font-weight: 400;'>", description, "</span></p>"))
+
+labels <- lapply(parks_sf$labels, HTML)
+
+parks_sf <- st_as_sf(parks_sf)
+
+class(parks_sf)
+
+leaflet(parks_sf) |>
+  setView(-93.8, 46.5, 6) |>
+  addTiles() |>
+  addPolygons(
+    color = "darkred",
+    fillColor = "darkred",
+    fillOpacity = 1,
+    weight = 2,
+    opacity = 1,
+    highlightOptions = highlightOptions(
+      weight = 5,
+      color = "red",
+      bringToFront = TRUE),
+    label = labels,
+    labelOptions = popupOptions( 
+      style = list("font-weight" = "normal", padding = "2px 5px", color = "black", "width" = "450px", "white-space" = "normal"),
+      textsize = "15px",
+      direction = "auto")
+  )
+```
+
